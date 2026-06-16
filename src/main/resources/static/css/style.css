@@ -6,4 +6,8 @@
 	transform : rotate(45deg);
 	position:relative;
 	bottom:4px
+	
+}
+.todo-area{
+    padding:20px;
 }

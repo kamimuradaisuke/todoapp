@@ -25,38 +25,30 @@ public class TodoController {
     @RequestMapping("/")
     public String index(Model model) {
 
-        logger.info("Todo一覧画面表示開始");
-
-        List<Todo> list = todoMapper.selectIncomplete();
-        List<Todo> doneList = todoMapper.selectComplete();
-
-        logger.debug("未完了件数={}", list.size());
-        logger.debug("完了件数={}", doneList.size());
+        List<Todo> list = todoMapper.selectAll();
 
         model.addAttribute("todos", list);
-        model.addAttribute("doneTodos", doneList);
 
         return "index";
     }
 
     @RequestMapping("/add")
-    @ResponseBody
-    public Todo add(Todo todo) {
+    public String add(Todo todo) {
 
-        logger.info("Todo追加開始 title={}", todo.getTitle());
+        logger.info("Todo追加開始 taskName={}", todo.getTaskName());
 
         todoMapper.add(todo);
 
-        logger.info("Todo追加完了 id={}", todo.getId());
+        logger.info("Todo追加完了");
 
-        return todo;
+        return "redirect:/";
     }
 
     @RequestMapping("/update")
     @ResponseBody
     public void update(Todo todo) {
 
-        logger.info("Todo更新 id={}", todo.getId());
+        logger.info("Todo更新 =taskId{}", todo.getTaskId());
 
         todoMapper.update(todo);
     }

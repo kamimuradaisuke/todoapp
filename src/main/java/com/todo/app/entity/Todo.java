@@ -5,8 +5,10 @@ import lombok.Data;
 @Data
 public class Todo {
 
-	private long id;
-	private String title;
-	private int done_flg;
-	private String time_limit;
+	private Long taskId;			// タスクID
+	private String taskName;		//タスク名
+	private Integer priorityId;		//優先度
+	private Integer categoryId;		//カテゴリ
+	private String day;				//実施予定日
+	private String memo;   			//メモ
 }
