@@ -44,29 +44,56 @@ body{
 				<th>優先度</th>
 				<th>カテゴリ</th>
 				<th>実施予定日</th>
-				<th>詳細</th>
 			</tr>
 		</thead>
 
 		<tbody>
 
-			<tr th:each="todo : ${todos}">
+			<tr th:each="todo : ${todos}"
+			th:if="${todo.doneFlg == 0}">
 				<td>
-					<input type="checkbox">
+					<form th:action="@{/done}" method="post">
+
+					       <input type="hidden"
+					              name="taskId"
+					              th:value="${todo.taskId}">
+
+					       <input type="checkbox"
+					              onchange="this.form.submit()">
+
+					   </form>
+
 				</td>
 
-				<td th:text="${todo.taskName}"></td>
+				<td th:text="${todo.parentId != null ? 
+					'L '+ todo.taskName : todo.taskName}">
+				</td>
 
-				<td th:text="${todo.priorityId}"></td>
-
-				<td th:text="${todo.categoryId}"></td>
-
-				<td th:text="${todo.scheduledWorkDate}"></td>
+				<td th:switch="${todo.priorityId}">
+					<span th:case="1">高</span>
+					<span th:case="2">中</span>
+					<span th:case="3">低</span>
+				</td>
+				
+				<td th:switch="${todo.categoryId}">
+					<span th:case="1">仕事</span>
+					<span th:case="2">趣味</span>
+					<span th:case="3">家事</span>
+					<span th:case="4">学習</span>
+				</td>
+				<td th:text="${todo.scheduledWorkDate}">
+				</td>
+				<td>
+				    <a th:href="@{/tasks/detail(taskId=${todo.taskId})}"
+				       class="btn btn-sm btn-info">
+				        詳細
+				    </a>
+				</td>
 
 				<td>
-					<a href="#">詳細</a>
-				</td>
-			</tr>
+				        <a th:href="@{'/tasks/' + ${todo.taskId}}"></a>
+				</tr>
+
 
 		</tbody>
 
@@ -75,10 +102,56 @@ body{
 
 	<div class="done-area">
 
-		<h4>
-			完了済みタスク
-		</h4>
+	    <h4>完了済みタスク</h4>
 
+	    <table class="table">
+
+	        <tbody>
+
+	            <tr th:each="todo : ${todos}"
+	                th:if="${todo.doneFlg == 1}">
+
+					<td>
+
+					    <form th:action="@{/undone}" method="post">
+
+					        <input type="hidden"
+					               name="taskId"
+					               th:value="${todo.taskId}">
+
+					        <input type="checkbox"
+					               checked
+					               onchange="this.form.submit()">
+
+					    </form>
+
+					</td>
+
+	                <td th:text="${todo.parentId != null ?
+	                    'L ' + todo.taskName : todo.taskName}">
+	                </td>
+
+	                <td th:switch="${todo.priorityId}">
+	                    <span th:case="1">高</span>
+	                    <span th:case="2">中</span>
+	                    <span th:case="3">低</span>
+	                </td>
+
+	                <td th:switch="${todo.categoryId}">
+	                    <span th:case="1">仕事</span>
+	                    <span th:case="2">趣味</span>
+	                    <span th:case="3">家事</span>
+	                    <span th:case="4">学習</span>
+	                </td>
+
+	                <td th:text="${todo.scheduledWorkDate}">
+	                </td>
+
+	            </tr>
+
+	        </tbody>
+
+	    </table>
 
 	</div>
 
@@ -87,7 +160,9 @@ body{
 	    class="btn btn-primary"
 	    data-toggle="modal"
 	    data-target="#addModal">
+		
 	    追加
+		
 	</button>
 
 	<button class="btn btn-outline-secondary">
@@ -95,7 +170,9 @@ body{
 	</button>
 
 </div>
-<div class="modal fade" id="addModal">
+<div class="modal fade"
+	id="addModal"
+	tabindex="-1">
 
     <div class="modal-dialog">
 
@@ -107,7 +184,9 @@ body{
 
             <div class="modal-body">
 
-                <form id="addForm">
+                <form id="addForm"
+					th:action="@{/add}"
+					method="post">
 
                     <div class="form-group">
                         <label>タスク名</label>
@@ -133,6 +212,8 @@ body{
                             <option value="1">仕事</option>
                             <option value="2">趣味</option>
                             <option value="3">家事</option>
+							<option value="4">学習</option>
+							
                         </select>
                     </div>
 
@@ -162,8 +243,9 @@ body{
                 </button>
 
                 <button
-                    id="addBtn"
-                    class="btn btn-primary">
+                   type="submit"
+				   form="addForm"
+				   class="btn btn-primary">
                     登録
                 </button>
 
@@ -174,5 +256,15 @@ body{
     </div>
 
 </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.5.1.min.js">
+	
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js">
+	
+</script>
+
 </body>
 </html>

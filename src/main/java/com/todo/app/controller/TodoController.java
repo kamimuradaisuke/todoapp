@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.todo.app.entity.Todo;
 import com.todo.app.mapper.TodoMapper;
 
+
 @Controller
 public class TodoController {
 
@@ -41,16 +42,15 @@ public class TodoController {
 
         logger.info("Todo追加完了");
 
-        return "redirect:/";
+        return "redirect:/detail?taskId="+todo.getTaskId();
     }
+    
+    @RequestMapping("/done")
+    public String done(Long taskId) {
 
-    @RequestMapping("/update")
-    @ResponseBody
-    public void update(Todo todo) {
+        todoMapper.done(taskId);
 
-        logger.info("Todo更新 =taskId{}", todo.getTaskId());
-
-        todoMapper.update(todo);
+        return "redirect:/";
     }
 
     @RequestMapping("/delete")
@@ -60,5 +60,11 @@ public class TodoController {
         logger.info("完了済みTodo削除");
 
         todoMapper.delete();
+    }
+    @RequestMapping("/detail")
+    public String detail(Long taskId,Model model) {
+    	Todo todo = todoMapper.selectById(taskId);
+    	model.addAttribute("todo",todo);
+    	return "detail";
     }
 }

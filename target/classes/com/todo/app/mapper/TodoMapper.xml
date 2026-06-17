@@ -11,9 +11,11 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         SELECT
             task_id,
             task_name,
+            done_flg,
             priority_id,
             category_id,
             scheduled_work_date,
+            parent_id,
             memo
         FROM item_table
 
@@ -21,26 +23,51 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 
 
 
-<insert id="add" parameterType="com.todo.app.entity.Todo">
+<insert id="add">
 
     INSERT INTO item_table
     (
-        task_id,
         task_name,
         priority_id,
         category_id,
         scheduled_work_date,
-        memo
+        memo,
+        done_flg
     )
     VALUES
     (
-        #{taskId},
         #{taskName},
         #{priorityId},
         #{categoryId},
         #{scheduledWorkDate},
-        #{memo}
+        #{memo},
+        0
     )
 
 </insert>
+<update id="done">
+
+    UPDATE item_table
+    SET done_flg = 1
+    WHERE task_id = #{taskId}
+
+</update>
+<select id="selectById"
+        parameterType="long"
+        resultType="com.todo.app.entity.Todo">
+
+    SELECT
+        task_id,
+        task_name,
+        done_flg,
+        priority_id,
+        category_id,
+        scheduled_work_date,
+        parent_id,
+        memo
+    FROM item_table
+    WHERE task_id = #{taskId}
+
+</select>
+
 </mapper>
