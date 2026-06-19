@@ -23,7 +23,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 
 
 
-<insert id="add">
+<insert id="add"
+		useGeneratedKeys="true"
+		keyProperty="taskId">
 
     INSERT INTO item_table
     (
@@ -31,6 +33,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         priority_id,
         category_id,
         scheduled_work_date,
+        parent_id,
         memo,
         done_flg
     )
@@ -40,6 +43,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         #{priorityId},
         #{categoryId},
         #{scheduledWorkDate},
+        #{parentId},
         #{memo},
         0
     )
@@ -52,6 +56,14 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     WHERE task_id = #{taskId}
 
 </update>
+<update id="undone">
+
+    UPDATE item_table
+    SET done_flg = 0
+    WHERE task_id = #{taskId}
+
+</update>
+
 <select id="selectById"
         parameterType="long"
         resultType="com.todo.app.entity.Todo">
@@ -67,6 +79,33 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         memo
     FROM item_table
     WHERE task_id = #{taskId}
+
+</select>
+<delete id="deleteComplete">
+	DELETE FROM item_table
+	WHERE done_flg = 1
+
+</delete>
+
+<update id="update">
+
+    UPDATE item_table
+    SET
+        task_name = #{taskName},
+        priority_id = #{priorityId},
+        category_id = #{categoryId},
+        scheduled_work_date = #{scheduledWorkDate},
+        memo = #{memo}
+    WHERE task_id = #{taskId}
+
+</update>
+<select id="selectSubTask"
+        parameterType="long"
+        resultType="com.todo.app.entity.Todo">
+
+    SELECT *
+    FROM item_table
+    WHERE parent_id = #{taskId}
 
 </select>
 

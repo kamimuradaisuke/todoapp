@@ -22,5 +22,10 @@ public interface TodoMapper {
 	public void delete();
 	public Todo selectById(Long taskId);
 	public void done(Long taskId);
+	public void undone(Integer taskId);
+	public void deleteComplete();
+	public List<Todo> selectSubTask(Long parentId);
+	
 	
 }
+

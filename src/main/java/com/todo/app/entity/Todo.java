@@ -14,4 +14,7 @@ public class Todo {
 	private Long parentId;			//親
 	private String memo;   			//メモ
 	private Integer doneFlg;
+	
+	
 }
+

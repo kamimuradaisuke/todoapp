@@ -84,7 +84,7 @@ body{
 				<td th:text="${todo.scheduledWorkDate}">
 				</td>
 				<td>
-				    <a th:href="@{/tasks/detail(taskId=${todo.taskId})}"
+				    <a th:href="@{/detail(taskId=${todo.taskId})}"
 				       class="btn btn-sm btn-info">
 				        詳細
 				    </a>
@@ -101,10 +101,30 @@ body{
 
 
 	<div class="done-area">
-
-	    <h4>完了済みタスク</h4>
+		
+		<h4>
+		    <button class="btn btn-link"
+		            type="button"
+		            data-toggle="collapse"
+		            data-target="#doneList">
+		        ▼ 完了済みタスク
+		        (<span th:text="${doneCount}"></span>件)
+		    </button>
+		</h4>
+		
+		<div id="doneList"class="collapse">
 
 	    <table class="table">
+			
+			<thead>
+			        <tr>
+			            <th>状態</th>
+			            <th>タスク</th>
+			            <th>優先度</th>
+			            <th>カテゴリ</th>
+			            <th>実施予定日</th>
+			        </tr>
+			    </thead>
 
 	        <tbody>
 
@@ -143,8 +163,7 @@ body{
 	                    <span th:case="3">家事</span>
 	                    <span th:case="4">学習</span>
 	                </td>
-
-	                <td th:text="${todo.scheduledWorkDate}">
+					<td th:text="${todo.scheduledWorkDate}">
 	                </td>
 
 	            </tr>
@@ -152,24 +171,31 @@ body{
 	        </tbody>
 
 	    </table>
+		</div>
 
 	</div>
 
-	<button
-	    type="button"
-	    class="btn btn-primary"
-	    data-toggle="modal"
-	    data-target="#addModal">
-		
-	    追加
-		
-	</button>
+	<div class="d-flex align-items-center">
 
-	<button class="btn btn-outline-secondary">
-		完了済みを削除
-	</button>
+	    <button
+	        type="button"
+	        class="btn btn-primary mr-2"
+	        data-toggle="modal"
+	        data-target="#addModal">
+	        追加
+	    </button>
 
-</div>
+	    <form th:action="@{/deleteComplete}" method="post">
+
+	        <button
+	            type="submit"
+	            class="btn btn-outline-secondary">
+	            完了済みを削除
+	        </button>
+
+	    </form>
+
+	</div>
 <div class="modal fade"
 	id="addModal"
 	tabindex="-1">
@@ -184,15 +210,16 @@ body{
 
             <div class="modal-body">
 
-                <form id="addForm"
-					th:action="@{/add}"
+                <form id="subTaskForm"
+					th:action="@{/addSubTask}"
 					method="post">
 
                     <div class="form-group">
                         <label>タスク名</label>
                         <input type="text"
                                name="taskName"
-                               class="form-control">
+                               class="form-control"
+							   required>
                     </div>
 
                     <div class="form-group">

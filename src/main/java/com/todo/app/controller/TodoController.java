@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
@@ -29,6 +30,11 @@ public class TodoController {
         List<Todo> list = todoMapper.selectAll();
 
         model.addAttribute("todos", list);
+        long doneCount = list.stream()
+                .filter(todo -> todo.getDoneFlg() == 1)
+                .count();
+
+        model.addAttribute("doneCount", doneCount);
 
         return "index";
     }
@@ -44,6 +50,7 @@ public class TodoController {
 
         return "redirect:/detail?taskId="+todo.getTaskId();
     }
+   
     
     @RequestMapping("/done")
     public String done(Long taskId) {
@@ -61,10 +68,72 @@ public class TodoController {
 
         todoMapper.delete();
     }
+    
+    @PostMapping("/deleteComplete")
+    public String deleteComplete() {
+
+        todoMapper.deleteComplete();
+
+        return "redirect:/";
+    }
+    
+    @PostMapping("/undone")
+    public String undone(Integer taskId) {
+
+        todoMapper.undone(taskId);
+
+        return "redirect:/";
+    }
+    
     @RequestMapping("/detail")
     public String detail(Long taskId,Model model) {
-    	Todo todo = todoMapper.selectById(taskId);
-    	model.addAttribute("todo",todo);
-    	return "detail";
+
+        Todo todo = todoMapper.selectById(taskId);
+
+        List<Todo> subTasks =
+                todoMapper.selectSubTask(taskId);
+
+        model.addAttribute("todo",todo);
+        model.addAttribute("subTasks", subTasks);
+
+        return "detail";
+    }
+    
+    @PostMapping("/update")
+    public String update(Todo todo) {
+    	todoMapper.update(todo);
+    	return "redirect:/detail?taskId=" + todo.getTaskId();
+    	
+    }
+    
+    @RequestMapping("/subtask/add")
+    public String subtaskAdd(Long parentId, Model model) {
+
+        Todo parent = todoMapper.selectById(parentId);
+
+        model.addAttribute("parent", parent);
+
+        return "subtaskAdd";
+    }
+    
+    @PostMapping("/addSubTask")
+    public String addSubTask(Todo todo) {
+
+        Long parentId = todo.getParentId();
+        todoMapper.add(todo);
+        return "redirect:/detail?taskId=" + parentId;
+    }
+    @RequestMapping("/subtask/detail")
+    public String subtaskDetail(Long taskId, Model model) {
+
+        Todo todo = todoMapper.selectById(taskId);
+
+        Todo parentTask =
+                todoMapper.selectById(todo.getParentId());
+
+        model.addAttribute("todo", todo);
+        model.addAttribute("parentTask", parentTask);
+
+        return "subtaskDetail";
     }
 }
