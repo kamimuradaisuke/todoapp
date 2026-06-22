@@ -21,6 +21,20 @@ body{
 .table td{
 	border:none;
 }
+.done-task td {
+    position: relative;
+    color: #888;
+    opacity: 0.7;
+}
+
+.done-task td::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    border-top: 1px solid #666;
+}
 
 
 </style>
@@ -48,9 +62,11 @@ body{
 		</thead>
 
 		<tbody>
-
-			<tr th:each="todo : ${todos}"
-			th:if="${todo.doneFlg == 0}">
+			
+			<th:block th:each="todo : ${todos}"
+			          th:if="${todo.parentId == null and todo.doneFlg == 0}">
+				<tr>
+				
 				<td>
 					<form th:action="@{/done}" method="post">
 
@@ -65,8 +81,14 @@ body{
 
 				</td>
 
-				<td th:text="${todo.parentId != null ? 
-					'L '+ todo.taskName : todo.taskName}">
+				<td th:class="${todo.parentId != null ? 'child-task' : ''}">
+				    <span th:if="${todo.parentId == null}">
+				        [[${todo.taskName}]]
+				    </span>
+
+				    <span th:if="${todo.parentId != null}">
+				        └─ [[${todo.taskName}]]
+				    </span>
 				</td>
 
 				<td th:switch="${todo.priorityId}">
@@ -89,92 +111,116 @@ body{
 				        詳細
 				    </a>
 				</td>
-
-				<td>
-				        <a th:href="@{'/tasks/' + ${todo.taskId}}"></a>
+				       
 				</tr>
+				
+				 <tr th:each="sub : ${todo.subTasks}">
 
 
-		</tbody>
+				        <td>
+				            └─ [[${sub.taskName}]]
+				        </td>
 
-	</table>
+				        <td th:switch="${sub.priorityId}">
+				            <span th:case="1">高</span>
+				            <span th:case="2">中</span>
+				            <span th:case="3">低</span>
+				        </td>
 
+				        <td th:switch="${sub.categoryId}">
+				            <span th:case="1">仕事</span>
+				            <span th:case="2">趣味</span>
+				            <span th:case="3">家事</span>
+				            <span th:case="4">学習</span>
+				        </td>
 
-	<div class="done-area">
-		
-		<h4>
-		    <button class="btn btn-link"
-		            type="button"
-		            data-toggle="collapse"
-		            data-target="#doneList">
-		        ▼ 完了済みタスク
-		        (<span th:text="${doneCount}"></span>件)
-		    </button>
-		</h4>
-		
-		<div id="doneList"class="collapse">
+				        <td th:text="${sub.scheduledWorkDate}"></td>
 
-	    <table class="table">
-			
-			<thead>
-			        <tr>
-			            <th>状態</th>
-			            <th>タスク</th>
-			            <th>優先度</th>
-			            <th>カテゴリ</th>
-			            <th>実施予定日</th>
-			        </tr>
-			    </thead>
+				        <td>
+				            <a th:href="@{/subtask/detail(taskId=${sub.taskId})}"
+				               class="btn btn-sm btn-info">
+				                詳細
+				            </a>
+				        </td>
 
-	        <tbody>
+				    </tr>
 
-	            <tr th:each="todo : ${todos}"
-	                th:if="${todo.doneFlg == 1}">
+				</th:block>
 
-					<td>
+				</tbody>
+				</table>
+				
 
-					    <form th:action="@{/undone}" method="post">
+				<div class="done-area mt-4">
 
-					        <input type="hidden"
-					               name="taskId"
-					               th:value="${todo.taskId}">
+				    <h4>
+						完了済みタスク(<span th:text="${doneCount}"></span>件)
+				        <button class="btn btn-link"
+				                type="button"
+				                data-toggle="collapse"
+				                data-target="#doneList"
+				                aria-expanded="false">
+				            ▼
+				        </button>
+				    </h4>
 
-					        <input type="checkbox"
-					               checked
-					               onchange="this.form.submit()">
+				    <div id="doneList" class="collapse">
 
-					    </form>
+				        <table class="table table-sm text-muted">
 
-					</td>
+				            <thead>
+				            <tr>
+				                <th>状態</th>
+				                <th>タスク</th>
+				                <th>優先度</th>
+				                <th>カテゴリ</th>
+				                <th>実施予定日</th>
+				            </tr>
+				            </thead>
 
-	                <td th:text="${todo.parentId != null ?
-	                    'L ' + todo.taskName : todo.taskName}">
-	                </td>
+				            <tbody>
 
-	                <td th:switch="${todo.priorityId}">
-	                    <span th:case="1">高</span>
-	                    <span th:case="2">中</span>
-	                    <span th:case="3">低</span>
-	                </td>
+				            <tr th:each="todo : ${todos}"
+				                th:if="${todo.doneFlg == 1}"
+								class="done-task">
 
-	                <td th:switch="${todo.categoryId}">
-	                    <span th:case="1">仕事</span>
-	                    <span th:case="2">趣味</span>
-	                    <span th:case="3">家事</span>
-	                    <span th:case="4">学習</span>
-	                </td>
-					<td th:text="${todo.scheduledWorkDate}">
-	                </td>
+				                <td>
+				                    <form th:action="@{/undone}" method="post">
+				                        <input type="hidden"
+				                               name="taskId"
+				                               th:value="${todo.taskId}">
+				                        <input type="checkbox"
+				                               checked
+				                               onchange="this.form.submit()">
+				                    </form>
+				                </td>
 
-	            </tr>
+				                <td th:text="${todo.taskName}"></td>
 
-	        </tbody>
+				                <td th:switch="${todo.priorityId}">
+				                    <span th:case="1">高</span>
+				                    <span th:case="2">中</span>
+				                    <span th:case="3">低</span>
+				                </td>
 
-	    </table>
-		</div>
+				                <td th:switch="${todo.categoryId}">
+				                    <span th:case="1">仕事</span>
+				                    <span th:case="2">趣味</span>
+				                    <span th:case="3">家事</span>
+				                    <span th:case="4">学習</span>
+				                </td>
 
-	</div>
+				                <td th:text="${todo.scheduledWorkDate}"></td>
 
+				            </tr>
+
+				            </tbody>
+
+				        </table>
+
+				    </div>
+
+				</div>
 	<div class="d-flex align-items-center">
 
 	    <button
@@ -210,17 +256,22 @@ body{
 
             <div class="modal-body">
 
-                <form id="subTaskForm"
-					th:action="@{/addSubTask}"
-					method="post">
+				<form id="addForm"
+				      th:action="@{/add}"
+				      th:object="${todo}"
+				      method="post">
 
                     <div class="form-group">
                         <label>タスク名</label>
-                        <input type="text"
-                               name="taskName"
-                               class="form-control"
-							   required>
+						<input type="text"
+						       th:field="*{taskName}"
+						       class="form-control"
+						       required>
                     </div>
+					<div th:if="${#fields.hasErrors('taskName')}"
+					     th:errors="*{taskName}"
+					     style="color:red;">
+					</div>
 
                     <div class="form-group">
                         <label>優先度</label>

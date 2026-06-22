@@ -18,6 +18,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             parent_id,
             memo
         FROM item_table
+        ORDER BY
+   			COALESCE(parent_id, task_id),
+    		parent_id NULLS FIRST,
+    		task_id
 
     </select>
 
@@ -56,6 +60,15 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     WHERE task_id = #{taskId}
 
 </update>
+
+<update id="doneSubTask">
+
+    UPDATE item_table
+    SET done_flg = 1
+    WHERE parent_id = #{taskId}
+
+</update>
+
 <update id="undone">
 
     UPDATE item_table
@@ -63,6 +76,26 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     WHERE task_id = #{taskId}
 
 </update>
+
+<update id="undoneSubTask">
+    UPDATE item_table
+    SET done_flg = 0
+    WHERE parent_id = #{taskId}
+</update>
+
+<update id="update">
+
+    UPDATE item_table
+    SET
+        task_name = #{taskName},
+        priority_id = #{priorityId},
+        category_id = #{categoryId},
+        scheduled_work_date = #{scheduledWorkDate},
+        memo = #{memo}
+    WHERE task_id = #{taskId}
+
+</update>
+
 
 <select id="selectById"
         parameterType="long"
@@ -87,18 +120,6 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 
 </delete>
 
-<update id="update">
-
-    UPDATE item_table
-    SET
-        task_name = #{taskName},
-        priority_id = #{priorityId},
-        category_id = #{categoryId},
-        scheduled_work_date = #{scheduledWorkDate},
-        memo = #{memo}
-    WHERE task_id = #{taskId}
-
-</update>
 <select id="selectSubTask"
         parameterType="long"
         resultType="com.todo.app.entity.Todo">

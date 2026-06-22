@@ -2,11 +2,14 @@ package com.todo.app.controller;
 
 import java.util.List;
 
+import jakarta.validation.Valid;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -29,18 +32,35 @@ public class TodoController {
 
         List<Todo> list = todoMapper.selectAll();
 
+        for (Todo parent : list) {
+            if (parent.getParentId() == null) {
+                List<Todo> children =
+                        todoMapper.selectSubTask(parent.getTaskId());
+                parent.setSubTasks(children);
+            }
+        }
+
         model.addAttribute("todos", list);
+
         long doneCount = list.stream()
                 .filter(todo -> todo.getDoneFlg() == 1)
                 .count();
 
         model.addAttribute("doneCount", doneCount);
 
+        // ⭐これが必要
+        model.addAttribute("todo", new Todo());
+
         return "index";
     }
 
-    @RequestMapping("/add")
-    public String add(Todo todo) {
+    @PostMapping("/add")
+    public String add(@Valid Todo todo,
+                      BindingResult result) {
+
+        if (result.hasErrors()) {
+            return "todoList"; // エラー時は画面に戻す
+        }
 
         logger.info("Todo追加開始 taskName={}", todo.getTaskName());
 
@@ -48,7 +68,7 @@ public class TodoController {
 
         logger.info("Todo追加完了");
 
-        return "redirect:/detail?taskId="+todo.getTaskId();
+        return "redirect:/detail?taskId=" + todo.getTaskId();
     }
    
     
@@ -56,6 +76,8 @@ public class TodoController {
     public String done(Long taskId) {
 
         todoMapper.done(taskId);
+
+        todoMapper.doneSubTask(taskId);
 
         return "redirect:/";
     }
@@ -81,6 +103,7 @@ public class TodoController {
     public String undone(Integer taskId) {
 
         todoMapper.undone(taskId);
+        todoMapper.undoneSubTask(Long.valueOf(taskId));
 
         return "redirect:/";
     }
@@ -116,13 +139,23 @@ public class TodoController {
         return "subtaskAdd";
     }
     
+    @PostMapping("/updateSubTask")
+    public String updateSubTask(Todo todo) {
+
+        todoMapper.update(todo);
+
+        return "redirect:/subtask/detail?taskId="
+                + todo.getTaskId();
+    }
+    
     @PostMapping("/addSubTask")
     public String addSubTask(Todo todo) {
 
-        Long parentId = todo.getParentId();
         todoMapper.add(todo);
-        return "redirect:/detail?taskId=" + parentId;
+
+        return "redirect:/subtask/detail?taskId=" + todo.getTaskId();
     }
+    
     @RequestMapping("/subtask/detail")
     public String subtaskDetail(Long taskId, Model model) {
 
@@ -137,3 +170,5 @@ public class TodoController {
         return "subtaskDetail";
     }
 }
+
+

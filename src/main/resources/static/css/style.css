@@ -8,6 +8,27 @@
 	bottom:4px;
 	
 }
+
+.child-task{
+    padding-left:40px !important;
+    color:#666;
+}
+
 .todo-area{
     padding:20px;
+}
+
+.done-task td {
+    position: relative;
+    color: #888;
+    opacity: 0.7;
+}
+
+.done-task td::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    border-top: 1px solid #666;
 }

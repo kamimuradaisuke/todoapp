@@ -6,6 +6,7 @@ import org.apache.ibatis.annotations.Mapper;
 
 import com.todo.app.entity.Todo;
 
+
 @Mapper
 public interface TodoMapper {
 
@@ -22,7 +23,9 @@ public interface TodoMapper {
 	public void delete();
 	public Todo selectById(Long taskId);
 	public void done(Long taskId);
+	public void doneSubTask(Long taskId);
 	public void undone(Integer taskId);
+	public void undoneSubTask(Long taskId);
 	public void deleteComplete();
 	public List<Todo> selectSubTask(Long parentId);
 	
