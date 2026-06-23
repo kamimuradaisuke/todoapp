@@ -74,15 +74,17 @@ href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
 					<input type="hidden"
 						   name="taskId"
 						   th:value="${todo.taskId}">
-						   
+				   	   
 						  
 
 					    <input type="checkbox"
 					           name="doneFlg"
 							   value="1"
 					           th:checked="${todo.doneFlg == 1}">
+					    <input type="hidden"
+						       name="doneFlg"
+						       value="0">
 							   
-					</form>
 			    </div>
 
 			</div>
@@ -241,7 +243,7 @@ href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
                                name="taskName"
                                class="form-control"
 							   required
-							   oninvalid="this.setCustomValidity('タスクを入力してください')"
+							   oninvalid="this.setCustomValidity('タスク名を入力してください')"
 							   oninput="this.setCustomValidity('')">
                     </div>
 

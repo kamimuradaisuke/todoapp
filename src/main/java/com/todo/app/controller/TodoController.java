@@ -123,9 +123,6 @@ public class TodoController {
     @PostMapping("/update")
     public String update(Todo todo) {
 
-        if (todo.getDoneFlg() == null) {
-            todo.setDoneFlg(0);
-        }
 
         todoMapper.update(todo);
 
@@ -151,10 +148,7 @@ public class TodoController {
     @PostMapping("/updateSubTask")
     public String updateSubTask(Todo todo) {
 
-        if (todo.getDoneFlg() == null) {
-            todo.setDoneFlg(0);
-        }
-
+        
         todoMapper.update(todo);
 
         return "redirect:/subtask/detail?taskId="
