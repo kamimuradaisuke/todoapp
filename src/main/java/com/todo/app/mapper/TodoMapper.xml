@@ -91,7 +91,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         priority_id = #{priorityId},
         category_id = #{categoryId},
         scheduled_work_date = #{scheduledWorkDate},
-        memo = #{memo}
+        memo = #{memo},
+        done_flg = #{doneFlg}
     WHERE task_id = #{taskId}
 
 </update>
@@ -107,7 +108,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         done_flg,
         priority_id,
         category_id,
-        scheduled_work_date,
+         scheduled_work_date,
         parent_id,
         memo
     FROM item_table

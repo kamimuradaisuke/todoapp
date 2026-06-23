@@ -12,7 +12,7 @@ public class Todo {
 
     private Long taskId;            // タスクID
 
-    @NotBlank(message = "タスク名は必須です")
+    @NotBlank(message = "タスクを入力してください")
     private String taskName;        // タスク名
 
     private Integer priorityId;     // 優先度

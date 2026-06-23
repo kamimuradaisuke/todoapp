@@ -48,7 +48,6 @@ public class TodoController {
 
         model.addAttribute("doneCount", doneCount);
 
-        // ⭐これが必要
         model.addAttribute("todo", new Todo());
 
         return "index";
@@ -59,7 +58,7 @@ public class TodoController {
                       BindingResult result) {
 
         if (result.hasErrors()) {
-            return "todoList"; // エラー時は画面に戻す
+            return "todoList";
         }
 
         logger.info("Todo追加開始 taskName={}", todo.getTaskName());
@@ -74,7 +73,6 @@ public class TodoController {
     
     @RequestMapping("/done")
     public String done(Long taskId) {
-
         todoMapper.done(taskId);
 
         todoMapper.doneSubTask(taskId);
@@ -124,9 +122,20 @@ public class TodoController {
     
     @PostMapping("/update")
     public String update(Todo todo) {
-    	todoMapper.update(todo);
-    	return "redirect:/detail?taskId=" + todo.getTaskId();
-    	
+
+        if (todo.getDoneFlg() == null) {
+            todo.setDoneFlg(0);
+        }
+
+        todoMapper.update(todo);
+
+        if (todo.getDoneFlg() == 1) {
+            todoMapper.doneSubTask(todo.getTaskId());
+        } else {
+            todoMapper.undoneSubTask(todo.getTaskId());
+        }
+
+        return "redirect:/detail?taskId=" + todo.getTaskId();
     }
     
     @RequestMapping("/subtask/add")
@@ -142,12 +151,15 @@ public class TodoController {
     @PostMapping("/updateSubTask")
     public String updateSubTask(Todo todo) {
 
+        if (todo.getDoneFlg() == null) {
+            todo.setDoneFlg(0);
+        }
+
         todoMapper.update(todo);
 
         return "redirect:/subtask/detail?taskId="
                 + todo.getTaskId();
     }
-    
     @PostMapping("/addSubTask")
     public String addSubTask(Todo todo) {
 

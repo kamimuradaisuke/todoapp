@@ -114,11 +114,19 @@ body{
 				       
 				</tr>
 				
-				 <tr th:each="sub : ${todo.subTasks}">
-
-
-				        <td>
-				            └─ [[${sub.taskName}]]
+					<tr th:each="sub : ${todo.subTasks}" 
+									 th:if="${sub.doneFlg == 0}">
+										<td>
+										        <form th:action="@{/done}" method="post">
+										        └─<input type="hidden"
+										                   name="taskId"
+										                   th:value="${sub.taskId}">
+										            <input type="checkbox"
+										                   onchange="this.form.submit()">
+										        </form>
+										    </td>
+					    <td>
+				             [[${sub.taskName}]]
 				        </td>
 
 				        <td th:switch="${sub.priorityId}">
@@ -262,11 +270,15 @@ body{
 				      method="post">
 
                     <div class="form-group">
-                        <label>タスク名</label>
+                        <label>タスク名
+							<span class="text-danger">*</span>
+						</label>
 						<input type="text"
 						       th:field="*{taskName}"
 						       class="form-control"
-						       required>
+						       required
+							   oninvalid="this.setCustomValidity('タスク名を入力してください')"
+							   oninput="this.setCustomValidity('')">
                     </div>
 					<div th:if="${#fields.hasErrors('taskName')}"
 					     th:errors="*{taskName}"
@@ -317,7 +329,7 @@ body{
                 <button
                     class="btn btn-secondary"
                     data-dismiss="modal">
-                    閉じる
+                    キャンセル
                 </button>
 
                 <button
