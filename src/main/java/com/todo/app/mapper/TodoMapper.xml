@@ -9,15 +9,22 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             resultType="com.todo.app.entity.Todo">
 
         SELECT
-            task_id,
-            task_name,
-            done_flg,
-            priority_id,
-            category_id,
-            scheduled_work_date,
-            parent_id,
-            memo
-        FROM item_table
+            t.task_id,
+            t.task_name,
+            t.done_flg,
+            t.priority_id,
+            p.priority_name AS priority_name,
+            t.category_id,
+            c.category_name AS category_name,
+            t.scheduled_work_date,
+            t.parent_id,
+            t.memo
+        FROM item_table t
+        LEFT JOIN priority_deta p
+        	ON t.priority_id = p.priority_id
+        LEFT JOIN category_deta c
+        	ON t.category_id = c.category_id
+        
         ORDER BY
    			COALESCE(parent_id, task_id),
     		parent_id NULLS FIRST,
@@ -103,16 +110,23 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         resultType="com.todo.app.entity.Todo">
 
     SELECT
-        task_id,
-        task_name,
-        done_flg,
-        priority_id,
-        category_id,
-         scheduled_work_date,
-        parent_id,
-        memo
-    FROM item_table
+        t.task_id,
+        t.task_name,
+        t.done_flg,
+        t.priority_id,
+        p.priority_name AS priority_name,
+        t.category_id,
+        c.category_name AS category_name,
+        t.scheduled_work_date,
+        t.parent_id,
+        t.memo
+    FROM item_table t
+    LEFT JOIN priority_deta p
+      	ON t.priority_id = p.priority_id
+    LEFT JOIN category_deta c
+       	ON t.category_id = c.category_id
     WHERE task_id = #{taskId}
+    
 
 </select>
 <delete id="deleteComplete">
@@ -131,4 +145,21 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 
 </select>
 
+<select id="selectPriorityList"
+	resultType="com.todo.app.entity.Todo">
+SELECT
+	priority_id,
+	priority_name
+FROM priority_deta
+ORDER BY priority_id
+</select>
+
+<select id="selectCategoryList"
+	resultType="com.todo.app.entity.Todo">
+SELECT
+	category_id,
+	category_name
+FROM category_deta
+ORDER BY category_id
+</select>
 </mapper>

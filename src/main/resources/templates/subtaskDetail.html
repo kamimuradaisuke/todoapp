@@ -32,132 +32,96 @@ href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
 
     <h3>子タスク詳細</h3>
 
-	<form action="/updateSubTask" method="post">
+<form action="/updateSubTask" method="post">
 
-        <input type="hidden"
-               name="taskId"
-               th:value="${todo.taskId}">
+	<input type="hidden"
+		name="taskId"
+        th:value="${todo.taskId}">
 
-        <input type="hidden"
-               name="parentId"
-               th:value="${todo.parentId}">
+	<input type="hidden"
+    	name="parentId"
+        th:value="${todo.parentId}">
 
-        <div class="text-right mb-3">
+	<div class="text-right mb-3">
 
-            <a th:href="@{/detail(taskId=${todo.parentId})}"
-               class="btn btn-secondary">
-                戻る
-            </a>
+    <a th:href="@{/detail(taskId=${todo.parentId})}"
+    	class="btn btn-secondary">
+        戻る
+    </a>
 
-            <button type="submit"
-                    class="btn btn-primary">
-                保存
-            </button>
+	<button type="submit"
+        class="btn btn-primary">
+		保存
+	</button>
 
-        </div>
+</div>
 
-        <!-- 親タスク名 -->
-        <div class="form-group">
-            <label>親タスク名</label>
+<div class="form-group">
+	<label>親タスク名</label>
 
-            <input type="text"
-                   class="form-control"
-                   th:value="${parentTask.taskName}"
-                   readonly>
-        </div>
+	<input type="text"
+    	class="form-control"
+        th:value="${parentTask.taskName}"
+        readonly>
+</div>
 		
 
-        <div class="form-row">
+<div class="form-row">
 
-            <!-- 状態 -->
-            <div class="col-md-1">
-                <label>状態</label>
+	<div class="col-md-1">
+    <label>状態</label>
 
-				<div>
-					<input type="hidden"
-					       name="taskId"
-					       th:value="${todo.taskId}">
+	<div>
+		<input type="hidden"
+	       name="taskId"
+	       th:value="${todo.taskId}">
 			  
 
-					<input type="checkbox"
-					       name="doneFlg"
-						   value="1"
-					       th:checked="${todo.doneFlg == 1}">
-				    <input type="hidden"
-					       name="doneFlg"
-					       value="0">
+		<input type="checkbox"
+	       name="doneFlg"
+		   value="1"
+	       th:checked="${todo.doneFlg == 1}">
+	    <input type="hidden"
+	       name="doneFlg"
+	       value="0">
 
-				</div>
-            </div>
+	</div>
+</div>
 
-            <!-- タスク名 -->
-            <div class="col-md-3">
-                <label>タスク名</label>
+<div class="col-md-3">
+<label>タスク名</label>
 
-                <input type="text"
-                       class="form-control"
-                       name="taskName"
-                       th:value="${todo.taskName}"
-					   required
-					   oninvalid="this.setCustomValidity('タスク名を入力してください')"
-					   oninput="this.setCustomValidity('')">
+	<input type="text"
+    	class="form-control"
+		name="taskName"
+        th:value="${todo.taskName}"
+		required
+		oninvalid="this.setCustomValidity('タスク名を入力してください')"
+		oninput="this.setCustomValidity('')">
 					                      
-            </div>
+</div>
 
-            <!-- 優先度 -->
-            <div class="col-md-2">
-                <label>優先度</label>
+<div class="form-group">
+	<label>優先度</label>
+	<select name="priorityId"
+		class="form-control">
+		<option th:each="p : ${priorityList}"
+			th:value="${p.priorityId}"
+			th:text="${p.priorityName}">
+		</option>
+	</select>
+</div>
 
-                <select class="form-control"
-                        name="priorityId">
-
-                    <option value="1"
-                    th:selected="${todo.priorityId == 1}">
-                        高
-                    </option>
-
-                    <option value="2"
-                    th:selected="${todo.priorityId == 2}">
-                        中
-                    </option>
-
-                    <option value="3"
-                    th:selected="${todo.priorityId == 3}">
-                        低
-                    </option>
-
-                </select>
-            </div>
-
-            <!-- カテゴリ -->
-            <div class="col-md-2">
-                <label>カテゴリ</label>
-
-                <select class="form-control"
-                        name="categoryId">
-
-                    <option value="1"
-                    th:selected="${todo.categoryId == 1}">
-                        仕事
-                    </option>
-
-                    <option value="2"
-                    th:selected="${todo.categoryId == 2}">
-                        趣味
-                    </option>
-
-                    <option value="3"
-                    th:selected="${todo.categoryId == 3}">
-                        家事
-                    </option>
-
-                    <option value="4"
-                    th:selected="${todo.categoryId == 4}">
-                        学習
-                    </option>
-
-                </select>
-            </div>
+			  <div class="form-group">
+			   	<label>カテゴリ</label>
+			    <select name="categoryId"
+			        class="form-control">
+			        <option th:each="c : ${catgoryList}"
+						th:value="${c.categoryId}"
+						th:text="${c.categoryName}">
+					</option>
+				</select>
+			  </div>
 
             <!-- 実施予定日 -->
             <div class="col-md-3">

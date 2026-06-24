@@ -16,7 +16,9 @@ public class Todo {
     private String taskName;        // タスク名
 
     private Integer priorityId;     // 優先度
+    private String priorityName;
     private Integer categoryId;     // カテゴリ
+    private String categoryName;
     private LocalDate scheduledWorkDate; // 実施予定日
     private Long parentId;          // 親タスク
     private String memo;            // メモ

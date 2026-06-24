@@ -91,18 +91,9 @@ body{
 				    </span>
 				</td>
 
-				<td th:switch="${todo.priorityId}">
-					<span th:case="1">高</span>
-					<span th:case="2">中</span>
-					<span th:case="3">低</span>
-				</td>
+				<td th:text="${todo.priorityName}"></td>
 				
-				<td th:switch="${todo.categoryId}">
-					<span th:case="1">仕事</span>
-					<span th:case="2">趣味</span>
-					<span th:case="3">家事</span>
-					<span th:case="4">学習</span>
-				</td>
+				<td th:text="${todo.categoryName}"></td>
 				<td th:text="${todo.scheduledWorkDate}">
 				</td>
 				<td>
@@ -129,19 +120,9 @@ body{
 				             [[${sub.taskName}]]
 				        </td>
 
-				        <td th:switch="${sub.priorityId}">
-				            <span th:case="1">高</span>
-				            <span th:case="2">中</span>
-				            <span th:case="3">低</span>
-				        </td>
+						<td th:text="${todo.priorityName}"></td>
 
-				        <td th:switch="${sub.categoryId}">
-				            <span th:case="1">仕事</span>
-				            <span th:case="2">趣味</span>
-				            <span th:case="3">家事</span>
-				            <span th:case="4">学習</span>
-				        </td>
-
+						<td th:text="${todo.categoryName}"></td>
 				        <td th:text="${sub.scheduledWorkDate}"></td>
 
 				        <td>
@@ -205,18 +186,9 @@ body{
 
 				                <td th:text="${todo.taskName}"></td>
 
-				                <td th:switch="${todo.priorityId}">
-				                    <span th:case="1">高</span>
-				                    <span th:case="2">中</span>
-				                    <span th:case="3">低</span>
-				                </td>
+								<td th:text="${todo.priorityName}"></td>
 
-				                <td th:switch="${todo.categoryId}">
-				                    <span th:case="1">仕事</span>
-				                    <span th:case="2">趣味</span>
-				                    <span th:case="3">家事</span>
-				                    <span th:case="4">学習</span>
-				                </td>
+								<td th:text="${todo.categoryName}"></td>
 
 				                <td th:text="${todo.scheduledWorkDate}"></td>
 
@@ -289,9 +261,10 @@ body{
                         <label>優先度</label>
                         <select name="priorityId"
                                 class="form-control">
-                            <option value="1">高</option>
-                            <option value="2">中</option>
-                            <option value="3">低</option>
+                            <option th:each="p : ${priorityList}"
+							        th:value="${p.priorityId}"
+								    th:text="${p.priorityName}">
+							</option>
                         </select>
                     </div>
 
@@ -299,10 +272,10 @@ body{
                         <label>カテゴリ</label>
                         <select name="categoryId"
                                 class="form-control">
-                            <option value="1">仕事</option>
-                            <option value="2">趣味</option>
-                            <option value="3">家事</option>
-							<option value="4">学習</option>
+                            <option th:each="c : ${catgoryList}"
+							        th:value="${c.categoryId}"
+									th:text="${c.categoryName}">
+							</option>
 							
                         </select>
                     </div>
