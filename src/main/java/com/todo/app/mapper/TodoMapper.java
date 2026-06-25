@@ -27,7 +27,6 @@ public interface TodoMapper {
 	public void doneSubTask(Long taskId);
 	public void undone(Integer taskId);
 	public void undoneSubTask(Long taskId);
-	public void deleteComplete();	
-	
+	public void deleteComplete();
 }
-
+	

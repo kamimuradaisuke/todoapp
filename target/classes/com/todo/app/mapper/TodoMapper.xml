@@ -9,21 +9,34 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             resultType="com.todo.app.entity.Todo">
 
         SELECT
-            task_id,
-            task_name,
-            done_flg,
-            priority_id,
-            category_id,
-            scheduled_work_date,
-            parent_id,
-            memo
-        FROM item_table
+            t.task_id,
+            t.task_name,
+            t.done_flg,
+            t.priority_id,
+            p.priority_name AS priority_name,
+            t.category_id,
+            c.category_name AS category_name,
+            t.scheduled_work_date,
+            t.parent_id,
+            t.memo
+        FROM item_table t
+        LEFT JOIN priority_deta p
+        	ON t.priority_id = p.priority_id
+        LEFT JOIN category_deta c
+        	ON t.category_id = c.category_id
+        
+        ORDER BY
+   			COALESCE(parent_id, task_id),
+    		parent_id NULLS FIRST,
+    		task_id
 
     </select>
 
 
 
-<insert id="add">
+<insert id="add"
+		useGeneratedKeys="true"
+		keyProperty="taskId">
 
     INSERT INTO item_table
     (
@@ -31,6 +44,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         priority_id,
         category_id,
         scheduled_work_date,
+        parent_id,
         memo,
         done_flg
     )
@@ -40,6 +54,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         #{priorityId},
         #{categoryId},
         #{scheduledWorkDate},
+        #{parentId},
         #{memo},
         0
     )
@@ -52,22 +67,99 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     WHERE task_id = #{taskId}
 
 </update>
+
+<update id="doneSubTask">
+
+    UPDATE item_table
+    SET done_flg = 1
+    WHERE parent_id = #{taskId}
+
+</update>
+
+<update id="undone">
+
+    UPDATE item_table
+    SET done_flg = 0
+    WHERE task_id = #{taskId}
+
+</update>
+
+<update id="undoneSubTask">
+    UPDATE item_table
+    SET done_flg = 0
+    WHERE parent_id = #{taskId}
+</update>
+
+<update id="update">
+
+    UPDATE item_table
+    SET
+        task_name = #{taskName},
+        priority_id = #{priorityId},
+        category_id = #{categoryId},
+        scheduled_work_date = #{scheduledWorkDate},
+        memo = #{memo},
+        done_flg = #{doneFlg}
+    WHERE task_id = #{taskId}
+
+</update>
+
+
 <select id="selectById"
         parameterType="long"
         resultType="com.todo.app.entity.Todo">
 
     SELECT
-        task_id,
-        task_name,
-        done_flg,
-        priority_id,
-        category_id,
-        scheduled_work_date,
-        parent_id,
-        memo
-    FROM item_table
+        t.task_id,
+        t.task_name,
+        t.done_flg,
+        t.priority_id,
+        p.priority_name AS priority_name,
+        t.category_id,
+        c.category_name AS category_name,
+        t.scheduled_work_date,
+        t.parent_id,
+        t.memo
+    FROM item_table t
+    LEFT JOIN priority_deta p
+      	ON t.priority_id = p.priority_id
+    LEFT JOIN category_deta c
+       	ON t.category_id = c.category_id
     WHERE task_id = #{taskId}
+    
+
+</select>
+<delete id="deleteComplete">
+	DELETE FROM item_table
+	WHERE done_flg = 1
+
+</delete>
+
+<select id="selectSubTask"
+        parameterType="long"
+        resultType="com.todo.app.entity.Todo">
+
+    SELECT *
+    FROM item_table
+    WHERE parent_id = #{taskId}
 
 </select>
 
+<select id="selectPriorityList"
+	resultType="com.todo.app.entity.Todo">
+SELECT
+	priority_id,
+	priority_name
+FROM priority_deta
+ORDER BY priority_id
+</select>
+
+<select id="selectCategoryList"
+	resultType="com.todo.app.entity.Todo">
+SELECT
+	category_id,
+	category_name
+FROM category_deta
+ORDER BY category_id
+</select>
 </mapper>
