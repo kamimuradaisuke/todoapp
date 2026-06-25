@@ -67,9 +67,10 @@ public class TodoController {
         return "index";
     }
     /**
-     * 
-     * 新規追加
-     * 入力された情報を詳細画面へ
+     * 新規Todoを追加する
+     *
+     * @param todo 入力されたTodo情報
+     * @return 詳細画面へリダイレクト
      */
     @PostMapping("/add")
     public String add(@Valid Todo todo,
@@ -90,7 +91,11 @@ public class TodoController {
         return "redirect:/detail?taskId=" + todo.getTaskId();
     }
     
-    //タスクを完了状態にする
+    /**
+     * タスクを完了状態にする
+     * 
+     * @param taskId 対象タスクID
+     */
     @RequestMapping("/done")
     public String done(Long taskId) {
     	
@@ -99,7 +104,12 @@ public class TodoController {
 
         return "redirect:/";
     }
-    //タスクを未完了状態にする
+    /**
+     *タスクを未完了状態にする
+     * 
+     * @param taskId 対象タスクID
+     * @return index画面へリダイレクト
+    */
     @PostMapping("/undone")
     public String undone(Integer taskId) {
     	
@@ -109,7 +119,7 @@ public class TodoController {
         return "redirect:/";
     }
     
-    // 完了済みTodoを削除する（内部処理用）
+    // 完了済みタスク削除する（内部処理用）
     @RequestMapping("/delete")
     @ResponseBody
     public void delete() {
@@ -119,7 +129,11 @@ public class TodoController {
         todoMapper.delete();
     }
     
-    //完了済みタスクを一括削除
+    /**
+     *完了済みタスクを一括削除
+     * 
+     * @return index画面へリダイレクト
+     */
     @PostMapping("/deleteComplete")
     public String deleteComplete() {
 
@@ -128,7 +142,12 @@ public class TodoController {
         return "redirect:/";
     }
     
-    //詳細画面を表示する
+    /**
+     * 詳細画面を表示する
+     * @param taskId タスクID
+     * @param model 画面表示用モデル
+     * @return detail画面
+     */
     @RequestMapping("/detail")
     public String detail(Long taskId,Model model) {
     	//親タスク取得
@@ -148,6 +167,9 @@ public class TodoController {
    /**
     * 親タスクを更新する
     * 親の状態に応じて子の状態も同期更新する
+    * 
+    * @param todo 更新対象データ
+    * @return detail画面へリダイレクト
     */
     @PostMapping("/update")
     public String update(Todo todo) {
@@ -165,7 +187,12 @@ public class TodoController {
         return "redirect:/detail?taskId=" + todo.getTaskId();
     }
     
-    //サブタスク追加画面を表示する
+    /**
+     * サブタスク追加画面を表示する
+     * @param parentId
+     * @param model
+     * @return
+     */
     @RequestMapping("/subtask/add")
     public String subtaskAdd(Long parentId, Model model) {
     	//親タスク取得
@@ -177,7 +204,12 @@ public class TodoController {
         return "subtaskAdd";
     }
     
-    //サブタスクを追加する
+    /**
+     * サブタスクを追加する
+     * 
+     * @param todo 登録するサブタスク
+     * @return subtaskDetail画面へリダイレクト
+     */
     @PostMapping("/addSubTask")
     public String addSubTask(Todo todo) {
 
@@ -187,7 +219,12 @@ public class TodoController {
     }
     
     
-    //サブタスク詳細画面を表示する
+    /**
+     * サブタスク詳細画面を表示する
+     * @param taskId サブタスクID
+     * @param model 画面表示用モデル
+     * @return subutasukDetail画面
+     */
     @RequestMapping("/subtask/detail")
     public String subtaskDetail(Long taskId, Model model) {
     	//サブタスク取得
@@ -204,7 +241,11 @@ public class TodoController {
         return "subtaskDetail";
     }
     
-    //サブタスクを更新する
+    /**
+     * サブタスクを更新する
+     * @param todo 更新対象サブタスク
+     * @return subtaskDetail画面へリダイレクト
+     */
     @PostMapping("/updateSubTask")
     public String updateSubTask(Todo todo) {
 
@@ -216,3 +257,5 @@ public class TodoController {
                 + todo.getTaskId();
     }
 }
+
+

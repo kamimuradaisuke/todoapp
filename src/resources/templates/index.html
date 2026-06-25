@@ -287,11 +287,13 @@ body{
                                class="form-control">
                     </div>
 
-                    <div class="form-group">
-                        <label>メモ</label>
-                        <textarea name="memo"
-                                  class="form-control"></textarea>
-                    </div>
+					<div class="form-group">
+					    <label>メモ</label>
+					    <textarea th:field="*{memo}"
+					              class="form-control"
+					              maxlength="1000">
+					    </textarea>
+					</div>
 
                 </form>
 
@@ -331,4 +333,3 @@ body{
 
 </body>
 </html>
-
