@@ -246,7 +246,7 @@ body{
 							<span class="text-danger">*</span>
 						</label>
 						<input type="text"
-						       th:field="*{taskName}"
+							   maxlength="100"
 						       class="form-control"
 						       required
 							   oninvalid="this.setCustomValidity('タスク名を入力してください')"
@@ -291,8 +291,8 @@ body{
 					    <label>メモ</label>
 					    <textarea th:field="*{memo}"
 					              class="form-control"
-					              maxlength="1000">
-					    </textarea>
+					              rows="10"
+					              maxlength="1000"></textarea>
 					</div>
 
                 </form>

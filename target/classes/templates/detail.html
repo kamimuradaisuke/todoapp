@@ -36,7 +36,7 @@ href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
 
     <h3>タスク詳細</h3>
 
-    <form th:action="@{/update}" method="post">
+    <form th:action="@{/update}" th:object="${todo}"method="post">
 
         <input type="hidden"
                name="taskId"
@@ -98,6 +98,7 @@ href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
                        class="form-control"
                        name="taskName"
                        th:value="${todo.taskName}"
+					   maxlength="100"
 					   required
 					   oninvalid="this.setCustomValidity('タスク名を入力してください')"
 					   oninput="this.setCustomValidity('')">
@@ -136,17 +137,14 @@ href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
 
         </div>
 
-        <div class="mt-4">
-
-            <label>メモ</label>
-
-            <textarea
-                class="form-control memo-area"
-                name="memo"
-                th:text="${todo.memo}">
-            </textarea>
-
-        </div>
+		<div class="form-group">
+		    <label>メモ</label>
+		    <textarea th:field="*{memo}"
+		              class="form-control"
+		              rows="10"
+		              maxlength="1000"
+				  th:text="${todo.memo}"></textarea>
+		</div>
 
     </form>
 
@@ -264,12 +262,13 @@ href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
                                class="form-control">
                     </div>
 
-                    <div class="form-group">
-                        <label>メモ</label>
-                        <textarea name="memo"
-                                  class="form-control"></textarea>
-                    </div>
-
+					<div class="form-group">
+					    <label>メモ</label>
+						<textarea name="memo"
+						          class="form-control"
+						          rows="10"
+						          maxlength="1000"></textarea>
+					</div>
 
             </div>
 
