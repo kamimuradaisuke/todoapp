@@ -74,11 +74,13 @@ public class TodoController {
      */
     @PostMapping("/add")
     public String add(@Valid Todo todo,
-                      BindingResult result) {
+            BindingResult result,
+            Model model) {
     	
     	//エラー時に一覧画面に戻す
         if (result.hasErrors()) {
-            return "todoList";
+        	System.out.println(result.getAllErrors());
+            return index(model);
         }
         
         logger.info("Todo追加開始 taskName={}", todo.getTaskName());

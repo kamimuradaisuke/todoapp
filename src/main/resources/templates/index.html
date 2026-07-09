@@ -120,9 +120,9 @@ body{
 				             [[${sub.taskName}]]
 				        </td>
 
-						<td th:text="${todo.priorityName}"></td>
+						<td th:text="${sub.priorityName}"></td>
 
-						<td th:text="${todo.categoryName}"></td>
+						<td th:text="${sub.categoryName}"></td>
 				        <td th:text="${sub.scheduledWorkDate}"></td>
 
 				        <td>
@@ -236,17 +236,14 @@ body{
 
             <div class="modal-body">
 
-				<form id="addForm"
-				      th:action="@{/add}"
-				      th:object="${todo}"
-				      method="post">
+				<form id="addForm" th:action="@{/add}" th:object="${todo}" method="post">
 
                     <div class="form-group">
                         <label>タスク名
 							<span class="text-danger">*</span>
 						</label>
 						<input type="text"
-							   maxlength="100"
+						th:field="*{taskName}"
 						       class="form-control"
 						       required
 							   oninvalid="this.setCustomValidity('タスク名を入力してください')"
@@ -291,11 +288,8 @@ body{
 					    <label>メモ</label>
 					    <textarea th:field="*{memo}"
 					              class="form-control"
-					              rows="10"
-					              maxlength="1000"></textarea>
+								  rows="5"></textarea>
 					</div>
-
-                </form>
 
             </div>
 
@@ -319,7 +313,7 @@ body{
         </div>
 
     </div>
-
+	</form>
 </div>
 </div>
 

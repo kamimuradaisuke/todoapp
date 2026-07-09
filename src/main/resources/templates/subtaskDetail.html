@@ -95,7 +95,6 @@ href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
     	class="form-control"
 		name="taskName"
 		th:value="${todo.taskName}"
-		maxlength="100"
 		required
 		oninvalid="this.setCustomValidity('タスク名を入力してください')"
 		oninput="this.setCustomValidity('')">
@@ -108,7 +107,8 @@ href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
 		class="form-control">
 		<option th:each="p : ${priorityList}"
 			th:value="${p.priorityId}"
-			th:text="${p.priorityName}">
+			th:text="${p.priorityName}"
+			th:selected="${p.priorityId == todo.priorityId}">
 		</option>
 	</select>
 </div>
@@ -119,7 +119,8 @@ href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
 			        class="form-control">
 			        <option th:each="c : ${catgoryList}"
 						th:value="${c.categoryId}"
-						th:text="${c.categoryName}">
+						th:text="${c.categoryName}"
+						th:selected="${c.categoryId == todo.categoryId}">
 					</option>
 				</select>
 			  </div>
@@ -141,9 +142,7 @@ href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
 		    <label>メモ</label>
 		    <textarea th:field="*{memo}"
 		              class="form-control"
-		              rows="10"
-		              maxlength="1000"
-				  th:text="${todo.memo}"></textarea>
+		              rows="5"></textarea>
 		</div>
 
     </form>
