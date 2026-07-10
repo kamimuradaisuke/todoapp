@@ -78,6 +78,40 @@ $('#delete').click(function(){
         $('#donetodes').empty();
         $('#done_count').text(0);
     })
-})
+});
 
-})
+const selectedFiles = [];
+const fileInput = document.getElementById("files");
+const hiddenInput = document.getElementById("hiddenFiles");
+const fileList = document.getElementById("fileList");
+const fileCount = document.getElementById("fileCount");
+
+fileInput.addEventListener("change",function (){
+	for(const file of this.files) {
+		if(!selectedFiles.some(f => f.name === file.name && f.size === file.size)) {
+			selectedFiles.push(file);
+		}
+	}
+		drawList();
+	this.value = "";
+});
+function drawList(){
+	fileList.innerHTML = "";
+	const dt = new DataTransfer();
+	selectedFiles.forEach((file, index) => {
+		dt.items.add(file);
+		const li = document.createElement("li");
+		li.innerHTML =
+		    "📄 " + file.name +
+		    ' <button type="button" onclick="removeFile(' + index + ')">削除</button>';
+		fileList.appendChild(li);
+	});
+	hiddenInput.files = dt.files;
+	fileCount.textContent = selectedFiles.length;
+	}
+	function removeFile(index){
+		selectedFiles.splice(index,1);
+		drawList();
+}
+});
+

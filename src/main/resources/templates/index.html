@@ -49,281 +49,251 @@ body{
 
 	<h2><b>マイタスク</b></h2>
 
-	<table class="table">
+<table class="table">
 
-		<thead>
-			<tr>
-				<th>状態</th>
-				<th>タスク</th>
-				<th>優先度</th>
-				<th>カテゴリ</th>
-				<th>実施予定日</th>
-			</tr>
-		</thead>
+	<thead>
+		<tr>
+			<th>状態</th>
+			<th>タスク</th>
+			<th>優先度</th>
+			<th>カテゴリ</th>
+			<th>実施予定日</th>
+		</tr>
+	</thead>
 
-		<tbody>
-			
-			<th:block th:each="todo : ${todos}"
-			          th:if="${todo.parentId == null and todo.doneFlg == 0}">
-				<tr>
-				
-				<td>
-					<form th:action="@{/done}" method="post">
+<tbody>
+	<th:block th:each="todo : ${todos}"
+		th:if="${todo.parentId == null and todo.doneFlg == 0}">
+		<tr>
+			<td>
+				<form th:action="@{/done}" method="post">
+			       <input type="hidden"
+			              name="taskId"
+			              th:value="${todo.taskId}">
+			       <input type="checkbox"
+			              onchange="this.form.submit()">
 
-					       <input type="hidden"
-					              name="taskId"
-					              th:value="${todo.taskId}">
+			   </form>
+			</td>
+			<td th:class="${todo.parentId != null ? 'child-task' : ''}">
+			    <span th:if="${todo.parentId == null}">
+			        [[${todo.taskName}]]
+			    </span>
+			    <span th:if="${todo.parentId != null}">
+			        └─ [[${todo.taskName}]]
+			    </span>
+			</td>
+			<td th:text="${todo.priorityName}"></td>			
+			<td th:text="${todo.categoryName}"></td>
+			<td th:text="${todo.scheduledWorkDate}">
+			</td>
+			<td>
+			    <a th:href="@{/detail(taskId=${todo.taskId})}"
+			       class="btn btn-sm btn-info">
+			        詳細
+			    </a>
+			</td>      
+		</tr>
+		<tr th:each="sub : ${todo.subTasks}" 
+			 th:if="${sub.doneFlg == 0}">
+			<td>
+				<form th:action="@{/done}" method="post">
+					└─<input type="hidden"
+					name="taskId"
+					th:value="${sub.taskId}">
+					<input type="checkbox"
+						onchange="this.form.submit()">
+				</form>
+			</td>
+			<td>
+				[[${sub.taskName}]]
+			</td>
 
-					       <input type="checkbox"
-					              onchange="this.form.submit()">
+			<td th:text="${sub.priorityName}"></td>
 
-					   </form>
+			<td th:text="${sub.categoryName}"></td>
+			<td th:text="${sub.scheduledWorkDate}"></td>
+	        <td>
+	            <a th:href="@{/subtask/detail(taskId=${sub.taskId})}"
+	               class="btn btn-sm btn-info">
+	                詳細
+	            </a>
+	        </td>
 
-				</td>
+	    </tr>
 
-				<td th:class="${todo.parentId != null ? 'child-task' : ''}">
-				    <span th:if="${todo.parentId == null}">
-				        [[${todo.taskName}]]
-				    </span>
+	</th:block>
+</tbody>
+</table>
+<div class="done-area mt-4">
+	<h4>
+	完了済みタスク(<span th:text="${doneCount}"></span>件)
+	<button class="btn btn-link"
+		type="button"
+		data-toggle="collapse"
+		data-target="#doneList"
+		aria-expanded="false">
+		▼
+	</button>
+	</h4>
 
-				    <span th:if="${todo.parentId != null}">
-				        └─ [[${todo.taskName}]]
-				    </span>
-				</td>
+<div id="doneList" class="collapse">
+<table class="table table-sm text-muted">
+    <thead>
+	<tr>
+		<th>状態</th>
+		<th>タスク</th>
+		<th>優先度</th>
+		<th>カテゴリ</th>
+		<th>実施予定日</th>
+	</tr>
+	</thead>
 
-				<td th:text="${todo.priorityName}"></td>
-				
-				<td th:text="${todo.categoryName}"></td>
-				<td th:text="${todo.scheduledWorkDate}">
-				</td>
-				<td>
-				    <a th:href="@{/detail(taskId=${todo.taskId})}"
-				       class="btn btn-sm btn-info">
-				        詳細
-				    </a>
-				</td>
-				       
-				</tr>
-				
-					<tr th:each="sub : ${todo.subTasks}" 
-									 th:if="${sub.doneFlg == 0}">
-										<td>
-										        <form th:action="@{/done}" method="post">
-										        └─<input type="hidden"
-										                   name="taskId"
-										                   th:value="${sub.taskId}">
-										            <input type="checkbox"
-										                   onchange="this.form.submit()">
-										        </form>
-										    </td>
-					    <td>
-				             [[${sub.taskName}]]
-				        </td>
+<tbody>
+	<tr th:each="todo : ${todos}"
+		th:if="${todo.doneFlg == 1}"
+			class="done-task">
+		<td>
+			<form th:action="@{/undone}" method="post">
+				<input type="hidden"
+					name="taskId"
+				    th:value="${todo.taskId}">
+				<input type="checkbox"
+					checked
+				    onchange="this.form.submit()">
+			</form>
+		</td>
 
-						<td th:text="${sub.priorityName}"></td>
+		<td th:text="${todo.taskName}"></td>
+		<td th:text="${todo.priorityName}"></td>
+		<td th:text="${todo.categoryName}"></td>
+		<td th:text="${todo.scheduledWorkDate}"></td>
+	</tr>
 
-						<td th:text="${sub.categoryName}"></td>
-				        <td th:text="${sub.scheduledWorkDate}"></td>
+</tbody>
+</table>
+</div>
 
-				        <td>
-				            <a th:href="@{/subtask/detail(taskId=${sub.taskId})}"
-				               class="btn btn-sm btn-info">
-				                詳細
-				            </a>
-				        </td>
+<div class="d-flex align-items-center">
+	<button
+		type="button"
+	    class="btn btn-primary mr-2"
+	    data-toggle="modal"
+	    data-target="#addModal">
+	    追加
+	</button>
 
-				    </tr>
+<form th:action="@{/deleteComplete}" method="post">
+     <button
+	 	type="submit"
+	    class="btn btn-outline-secondary">
+	    完了済みを削除
+	</button>
 
-				</th:block>
+</form>
+</div>
 
-				</tbody>
-				</table>
-				
-
-				<div class="done-area mt-4">
-
-				    <h4>
-						完了済みタスク(<span th:text="${doneCount}"></span>件)
-				        <button class="btn btn-link"
-				                type="button"
-				                data-toggle="collapse"
-				                data-target="#doneList"
-				                aria-expanded="false">
-				            ▼
-				        </button>
-				    </h4>
-
-				    <div id="doneList" class="collapse">
-
-				        <table class="table table-sm text-muted">
-
-				            <thead>
-				            <tr>
-				                <th>状態</th>
-				                <th>タスク</th>
-				                <th>優先度</th>
-				                <th>カテゴリ</th>
-				                <th>実施予定日</th>
-				            </tr>
-				            </thead>
-
-				            <tbody>
-
-				            <tr th:each="todo : ${todos}"
-				                th:if="${todo.doneFlg == 1}"
-								class="done-task">
-
-				                <td>
-				                    <form th:action="@{/undone}" method="post">
-				                        <input type="hidden"
-				                               name="taskId"
-				                               th:value="${todo.taskId}">
-				                        <input type="checkbox"
-				                               checked
-				                               onchange="this.form.submit()">
-				                    </form>
-				                </td>
-
-				                <td th:text="${todo.taskName}"></td>
-
-								<td th:text="${todo.priorityName}"></td>
-
-								<td th:text="${todo.categoryName}"></td>
-
-				                <td th:text="${todo.scheduledWorkDate}"></td>
-
-				            </tr>
-
-				            </tbody>
-
-				        </table>
-
-				    </div>
-
-				</div>
-	<div class="d-flex align-items-center">
-
-	    <button
-	        type="button"
-	        class="btn btn-primary mr-2"
-	        data-toggle="modal"
-	        data-target="#addModal">
-	        追加
-	    </button>
-
-	    <form th:action="@{/deleteComplete}" method="post">
-
-	        <button
-	            type="submit"
-	            class="btn btn-outline-secondary">
-	            完了済みを削除
-	        </button>
-
-	    </form>
-
-	</div>
 <div class="modal fade"
 	id="addModal"
 	tabindex="-1">
 
-    <div class="modal-dialog">
+<div class="modal-dialog">
 
-        <div class="modal-content">
+<div class="modal-content">
 
-            <div class="modal-header">
-                <h5>タスク追加</h5>
-            </div>
+<div class="modal-header">
+	<h5>タスク追加</h5>
+</div>
+<div class="modal-body">
+	<form id="addForm" th:action="@{/add}" 
+	th:object="${todo}" method="post" enctype="multipart/form-data" th:object="${todo}">
+<div class="form-group">
+	<label>タスク名
+		<span class="text-danger">*</span>
+	</label>
+	<input type="text"
+		th:field="*{taskName}"
+		class="form-control"
+		required
+		oninvalid="this.setCustomValidity('タスク名を入力してください')"
+		oninput="this.setCustomValidity('')">
+</div>
+<div th:if="${#fields.hasErrors('taskName')}"
+	th:errors="*{taskName}"
+	style="color:red;">
+</div>
 
-            <div class="modal-body">
+<div class="form-group">
+	<label>優先度</label>
+    	<select name="priorityId"
+        	class="form-control">
+            <option th:each="p : ${priorityList}"
+				th:value="${p.priorityId}"
+				th:text="${p.priorityName}">
+			</option>
+		</select>
+</div>
 
-				<form id="addForm" th:action="@{/add}" th:object="${todo}" method="post">
-
-                    <div class="form-group">
-                        <label>タスク名
-							<span class="text-danger">*</span>
-						</label>
-						<input type="text"
-						th:field="*{taskName}"
-						       class="form-control"
-						       required
-							   oninvalid="this.setCustomValidity('タスク名を入力してください')"
-							   oninput="this.setCustomValidity('')">
-                    </div>
-					<div th:if="${#fields.hasErrors('taskName')}"
-					     th:errors="*{taskName}"
-					     style="color:red;">
-					</div>
-
-                    <div class="form-group">
-                        <label>優先度</label>
-                        <select name="priorityId"
-                                class="form-control">
-                            <option th:each="p : ${priorityList}"
-							        th:value="${p.priorityId}"
-								    th:text="${p.priorityName}">
-							</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label>カテゴリ</label>
-                        <select name="categoryId"
-                                class="form-control">
-                            <option th:each="c : ${catgoryList}"
-							        th:value="${c.categoryId}"
-									th:text="${c.categoryName}">
-							</option>
+<div class="form-group">
+	<label>カテゴリ</label>
+    <select name="categoryId"
+    	class="form-control">
+        <option th:each="c : ${catgoryList}"
+			th:value="${c.categoryId}"
+			th:text="${c.categoryName}">
+		</option>
 							
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label>実施予定日</label>
-                        <input type="date"
-                               name="scheduledWorkDate"
-                               class="form-control">
-                    </div>
-
-					<div class="form-group">
-					    <label>メモ</label>
-					    <textarea th:field="*{memo}"
-					              class="form-control"
-								  rows="5"></textarea>
-					</div>
-
-            </div>
-
-            <div class="modal-footer">
-
-                <button
-                    class="btn btn-secondary"
-                    data-dismiss="modal">
-                    キャンセル
-                </button>
-
-                <button
-                   type="submit"
-				   form="addForm"
-				   class="btn btn-primary">
-                    登録
-                </button>
-
-            </div>
-
-        </div>
-
-    </div>
-	</form>
-</div>
+	</select>
 </div>
 
-<script src="https://code.jquery.com/jquery-3.5.1.min.js">
-	
-</script>
+<div class="form-group">
+	<label>実施予定日</label>
+    <input type="date"
+    	name="scheduledWorkDate"
+        class="form-control">
+</div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js">
-	
-</script>
+<div class="form-group">
+	<label>メモ</label>
+	<textarea th:field="*{memo}"
+		class="form-control"
+		rows="5"></textarea>
+</div>
+<div class="form-group">
+    <label>
+		添付ファイル <span id="fileCount">0</span>件
+    </label>
+        <input type="file" id="files" multiple>
 
+        <ul id="fileList"></ul>
+		<input type="file" id="hiddenFiles" name="files" multiple hidden>
+</div>
+			
+<div class="modal-footer">
+	<button
+    	class="btn btn-secondary"
+        data-dismiss="modal">
+        キャンセル
+	</button>
+
+    <button
+    	type="submit"
+		class="btn btn-primary">
+        登録
+     </button>
+
+
+</div>
+</form>
+</div>
+</div>
+</div>
+</div>
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+  // ファイル選択のJavaScript
+</script>
 </body>
 </html>

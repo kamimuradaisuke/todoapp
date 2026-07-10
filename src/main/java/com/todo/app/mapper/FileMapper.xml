@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.todo.app.mapper.FileMapper">
+
+    <!-- ファイル登録 -->
+    <insert id="insertFile"
+            parameterType="com.todo.app.entity.FileInfo"
+            useGeneratedKeys="true"
+            keyProperty="fileId">
+
+        INSERT INTO files_table (
+            task_id,
+            file_name,
+            file_path,
+            file_size
+        )
+        VALUES (
+            #{taskId},
+            #{fileName},
+            #{filePath},
+            #{fileSize},
+            #{contentType}
+        )
+
+    </insert>
+
+    <!-- タスクIDでファイル一覧取得 -->
+    <select id="selectByTaskId"
+            parameterType="long"
+            resultType="com.todo.app.entity.FileInfo">
+
+        SELECT
+            file_id,
+            task_id,
+            file_name,
+            file_path,
+            file_size
+        FROM
+            files_table
+        WHERE
+            task_id = #{taskId}
+        ORDER BY
+            file_id DESC
+
+    </select>
+
+    <!-- ファイルIDで取得（ダウンロード用） -->
+    <select id="selectByFileId"
+            parameterType="long"
+            resultType="com.todo.app.entity.FileInfo">
+
+        SELECT
+            file_id,
+            task_id,
+            file_name,
+            file_path,
+            file_size,
+            content_type
+        FROM
+            files_table
+        WHERE
+            file_id = #{fileId}
+
+    </select>
+
+    <!-- ファイル削除 -->
+    <delete id="deleteFile"
+            parameterType="long">
+
+        DELETE
+        FROM files_table
+        WHERE file_id = #{fileId}
+
+    </delete>
+
+</mapper>

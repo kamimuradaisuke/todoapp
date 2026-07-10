@@ -1,5 +1,10 @@
 package com.todo.app.controller;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
 
 import jakarta.validation.Valid;
@@ -12,9 +17,13 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
 
+import com.todo.app.entity.FileInfo;
 import com.todo.app.entity.Todo;
+import com.todo.app.mapper.FileMapper;
 import com.todo.app.mapper.TodoMapper;
 
 
@@ -25,9 +34,12 @@ public class TodoController {
 
     private static final Logger logger =
             LoggerFactory.getLogger(TodoController.class);
+    private final String uploadDir = "uploads";
     /** Todo操作用Mapper */
     @Autowired
     TodoMapper todoMapper;
+    @Autowired
+    FileMapper fileMapper;
     /**
      * マイタスク一覧画面を表示する
      *
@@ -73,23 +85,38 @@ public class TodoController {
      * @return 詳細画面へリダイレクト
      */
     @PostMapping("/add")
-    public String add(@Valid Todo todo,
+    public String add(
+    		@Valid Todo todo,
             BindingResult result,
-            Model model) {
+            Model model,
+            @RequestParam("files") MultipartFile[] files)
+    		throws IOException{
     	
     	//エラー時に一覧画面に戻す
         if (result.hasErrors()) {
         	System.out.println(result.getAllErrors());
             return index(model);
         }
-        
-        logger.info("Todo追加開始 taskName={}", todo.getTaskName());
-        
-        //DBに登録
+        //Todo登録
         todoMapper.add(todo);
-
-        logger.info("Todo追加完了");
-
+        
+        //添付ファイル登録
+        for (MultipartFile file : files) {
+        	if (file.isEmpty()) {
+        		continue;
+        	}
+        	String saveName = file.getOriginalFilename();
+        	Path path = Paths.get(uploadDir, saveName);
+        	Files.copy(file.getInputStream(),path,StandardCopyOption.REPLACE_EXISTING);
+        	
+        	FileInfo info = new FileInfo();
+        	info.setTaskId(todo.getTaskId());
+        	info.setFileName(saveName);
+        	info.setFilePath(path.toString());
+        	info.setFileSize(file.getSize());
+        	fileMapper.insertFile(info);
+        }
+        System.out.println("files = " + files.length);
         return "redirect:/detail?taskId=" + todo.getTaskId();
     }
     
@@ -157,9 +184,12 @@ public class TodoController {
         //子タスク取得
         List<Todo> subTasks =
                 todoMapper.selectSubTask(taskId);
+        List<FileInfo> fileList =
+                fileMapper.selectByTaskId(taskId);
         //画面へデータ設定
         model.addAttribute("todo",todo);
         model.addAttribute("subTasks", subTasks);
+        model.addAttribute("fileList",fileList);
         model.addAttribute("priorityList",todoMapper.selectPriorityList());
         model.addAttribute("catgoryList",todoMapper.selectCategoryList());
 
@@ -257,6 +287,29 @@ public class TodoController {
 
         return "redirect:/subtask/detail?taskId="
                 + todo.getTaskId();
+    }
+    
+    @PostMapping("/upload")
+    public String upload(
+    		@RequestParam Long taskId,
+    		@RequestParam("files") MultipartFile[] files) throws IOException{
+    	
+    	for (MultipartFile file : files) {
+    		if (file.isEmpty()) {
+    			continue;
+    		}
+    		String saveName = file.getOriginalFilename();
+    		Path path = Paths.get(uploadDir,saveName);
+    		Files.copy(file.getInputStream(),path,StandardCopyOption.REPLACE_EXISTING);
+    		FileInfo info = new FileInfo();
+    		info.setTaskId(taskId);
+    		info.setFileName(saveName);
+    		info.setFilePath(path.toString());
+    		info.setContentType(file.getContentType());
+    		
+    		fileMapper.insertFile(info);
+    		}
+    	return "redirect:/detail?taskId=" + taskId;
     }
 }
 
