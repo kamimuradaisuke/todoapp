@@ -12,6 +12,10 @@ import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -25,8 +29,6 @@ import com.todo.app.entity.FileInfo;
 import com.todo.app.entity.Todo;
 import com.todo.app.mapper.FileMapper;
 import com.todo.app.mapper.TodoMapper;
-
-
 
 
 @Controller
@@ -243,13 +245,37 @@ public class TodoController {
      * @return subtaskDetail画面へリダイレクト
      */
     @PostMapping("/addSubTask")
-    public String addSubTask(Todo todo) {
+    public String addSubTask(
+            Todo todo,
+            @RequestParam("files") MultipartFile[] files)
+            throws IOException {
 
         todoMapper.add(todo);
 
+        for (MultipartFile file : files) {
+
+            if (file.isEmpty()) {
+                continue;
+            }
+
+            String saveName = file.getOriginalFilename();
+            Path path = Paths.get(uploadDir, saveName);
+
+            Files.copy(file.getInputStream(),
+                    path,
+                    StandardCopyOption.REPLACE_EXISTING);
+
+            FileInfo info = new FileInfo();
+            info.setTaskId(todo.getTaskId());
+            info.setFileName(saveName);
+            info.setFilePath(path.toString());
+            info.setFileSize(file.getSize());
+
+            fileMapper.insertFile(info);
+        }
+
         return "redirect:/subtask/detail?taskId=" + todo.getTaskId();
     }
-    
     
     /**
      * サブタスク詳細画面を表示する
@@ -310,6 +336,23 @@ public class TodoController {
     		fileMapper.insertFile(info);
     		}
     	return "redirect:/detail?taskId=" + taskId;
+    }
+    @RequestMapping("/download")
+    public ResponseEntity<InputStreamResource> download(Long fileId) throws IOException {
+
+        FileInfo file = fileMapper.selectByFileId(fileId);
+
+        Path path = Paths.get(file.getFilePath());
+
+        InputStreamResource resource =
+                new InputStreamResource(Files.newInputStream(path));
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=\"" + file.getFileName() + "\"")
+                .contentLength(Files.size(path))
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .body(resource);
     }
 }
 

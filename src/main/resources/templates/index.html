@@ -206,7 +206,7 @@ body{
 </div>
 <div class="modal-body">
 	<form id="addForm" th:action="@{/add}" 
-	th:object="${todo}" method="post" enctype="multipart/form-data" th:object="${todo}">
+	th:object="${todo}" method="post" enctype="multipart/form-data">
 <div class="form-group">
 	<label>タスク名
 		<span class="text-danger">*</span>
@@ -263,10 +263,13 @@ body{
     <label>
 		添付ファイル <span id="fileCount">0</span>件
     </label>
-        <input type="file" id="files" multiple>
+	<input
+	    type="file"
+	    id="files"
+	    name="files"
+	    multiple>
 
-        <ul id="fileList"></ul>
-		<input type="file" id="hiddenFiles" name="files" multiple hidden>
+	<ul id="fileList"></ul>
 </div>
 			
 <div class="modal-footer">

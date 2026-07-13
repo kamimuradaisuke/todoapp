@@ -60,17 +60,6 @@ $('.button_for_show').click(function(){
     }
 })
 
-//追加処理
-$('#add').click(function() {
-    const params = $('#add_form').serializeArray();
-    $.post("/add",params).done(function(json){
-        const clone = $('#todes tr:first').clone(true);
-        clone.find('input[name="id"]').val(json.id);
-        clone.find('input[name="title"]').val(json.title);
-        clone.find('input[name="time_limit"]').val(json.time_limit);
-        $('#todes').append(clone[0]);
-    })
-})
 
 //削除処理
 $('#delete').click(function(){
@@ -80,38 +69,18 @@ $('#delete').click(function(){
     })
 });
 
-const selectedFiles = [];
 const fileInput = document.getElementById("files");
-const hiddenInput = document.getElementById("hiddenFiles");
 const fileList = document.getElementById("fileList");
 const fileCount = document.getElementById("fileCount");
 
-fileInput.addEventListener("change",function (){
-	for(const file of this.files) {
-		if(!selectedFiles.some(f => f.name === file.name && f.size === file.size)) {
-			selectedFiles.push(file);
-		}
-	}
-		drawList();
-	this.value = "";
-});
-function drawList(){
+fileInput.addEventListener("change", function () {
 	fileList.innerHTML = "";
-	const dt = new DataTransfer();
-	selectedFiles.forEach((file, index) => {
-		dt.items.add(file);
+	
+	for (const file of this.files) {
 		const li = document.createElement("li");
-		li.innerHTML =
-		    "📄 " + file.name +
-		    ' <button type="button" onclick="removeFile(' + index + ')">削除</button>';
+		li.textContent = "📄 " + file.name;
 		fileList.appendChild(li);
-	});
-	hiddenInput.files = dt.files;
-	fileCount.textContent = selectedFiles.length;
-	}
-	function removeFile(index){
-		selectedFiles.splice(index,1);
-		drawList();
-}
+		}
+	fileCount.textContent = this.files.length;
 });
 

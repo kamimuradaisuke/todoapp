@@ -15,7 +15,8 @@
             task_id,
             file_name,
             file_path,
-            file_size
+            file_size,
+            content_type
         )
         VALUES (
             #{taskId},

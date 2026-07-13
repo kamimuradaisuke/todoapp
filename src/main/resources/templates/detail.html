@@ -36,7 +36,7 @@ href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
 
     <h3>タスク詳細</h3>
 
-    <form th:action="@{/update}" method="post"th:object="${todo}">
+    <form th:action="@{/update}" method="post"th:object="${todo}"enctype="multipart/form-data">
 
         <input type="hidden"
                name="taskId"
@@ -137,6 +137,44 @@ href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
             </div>
 
         </div>
+		<div class="form-group">
+		    <label>添付ファイルを追加</label>
+
+		    <input type="file"
+		           id="files"
+		           name="files"
+		           multiple
+		           class="form-control-file">
+
+		    <ul id="fileList"></ul>
+		</div>
+
+		<div class="form-group">
+		    <label>
+		        添付ファイル
+		        (<span th:text="${#lists.size(fileList)}">0</span>件)
+		    </label>
+
+		    <table class="table table-sm">
+		        <tr th:each="file : ${fileList}">
+		            <td style="width:70%;">
+		                📄 <span th:text="${file.fileName}"></span>
+		            </td>
+		            <td>
+		                <a th:href="@{/download(fileId=${file.fileId})}"
+		                   class="btn btn-sm btn-primary">
+		                    ダウンロード
+		                </a>
+		            </td>
+		        </tr>
+
+		        <tr th:if="${#lists.isEmpty(fileList)}">
+		            <td colspan="2">
+		                添付ファイルはありません
+		            </td>
+		        </tr>
+		    </table>
+		</div>
 
 		<div class="form-group">
 		    <label>メモ</label>
@@ -201,7 +239,8 @@ href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
             </div>
 			<form id="subTaskForm"
 			      th:action="@{/addSubTask}"
-			      method="post">
+			      method="post"
+				   enctype="multipart/form-data">
 
 			    <input type="hidden"
 			           name="parentId"
@@ -269,6 +308,24 @@ href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
 						          class="form-control"
 								  rows="5"></textarea>
 					</div>
+					<script>
+					const subFiles = document.getElementById("subFiles");
+					const subFileList = document.getElementById("subFileList");
+					const subFileCount = document.getElementById("subFileCount");
+
+					subFiles.addEventListener("change", function () {
+
+					    subFileList.innerHTML = "";
+
+					    for (const file of this.files) {
+					        const li = document.createElement("li");
+					        li.textContent = "📄 " + file.name;
+					        subFileList.appendChild(li);
+					    }
+
+					    subFileCount.textContent = this.files.length;
+					});
+					</script>
 
             </div>
 
