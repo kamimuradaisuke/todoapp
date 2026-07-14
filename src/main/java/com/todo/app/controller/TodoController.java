@@ -8,6 +8,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
+import java.util.UUID;
 
 import jakarta.validation.Valid;
 
@@ -103,46 +104,15 @@ public class TodoController {
     	
     	//エラー時に一覧画面に戻す
         if (result.hasErrors()) {
-        	System.out.println(result.getAllErrors());
+        	logger.error("入力チェックエラー: {}", result.getAllErrors());
             return index(model);
         }
         //Todo登録
         todoMapper.add(todo);
         
-        //添付ファイル登録
-        for (MultipartFile file : files) {
-        	//ファイルが選択されてない場合はスキップ
-        	if (file.isEmpty()) {
-        		continue;
-        	}
-        	//ファイル名取得
-        	String saveName = file.getOriginalFilename();
-        	
-        	//保存先パス作成
-        	Path path = Paths.get(uploadDir, saveName);
-        	
-        	//ファイルをuploadsフォルダに保存
-        	Files.copy(file.getInputStream(),path,StandardCopyOption.REPLACE_EXISTING);
-        	
-        	//ファイル情報をDBに登録
-        	FileInfo info = new FileInfo();
-        	info.setTaskId(todo.getTaskId());
-        	info.setFileName(saveName);
-        	info.setFilePath(path.toString());
-        	info.setFileSize(file.getSize());
-        	
-        	//ファイル形式取得
-        	String contentType = file.getContentType();
-        	
-        	// 形式が取得できない場合はデフォルト設定
-        	if (contentType == null) {
-        		contentType = "application/octet-stream";
-        	}
-        	
-        	info.setContentType(file.getContentType());
-        	fileMapper.insertFile(info);
-        }
-        System.out.println("files = " + files.length);
+        saveFiles(todo.getTaskId(), files);
+        logger.info("Todo登録完了 taskId={},添付ファイル数={}",todo.getTaskId(), files.length);
+        
         return "redirect:/detail?taskId=" + todo.getTaskId();
     }
     
@@ -247,40 +217,11 @@ public class TodoController {
     public String update(Todo todo,
     		@RequestParam("files") MultipartFile[] files)
             throws IOException{
-    	
+    	try {
     	//タスク更新
         todoMapper.update(todo);
         
-        //添付ファイルを更新
-        for (MultipartFile file : files) {
-        	
-        	//未選択ファイルは処理しない
-            if (file.isEmpty()) {
-                continue;
-            }
-
-            String saveName = file.getOriginalFilename();
-
-            Path path = Paths.get(uploadDir, saveName);
-
-            Files.copy(file.getInputStream(),
-                    path,
-                    StandardCopyOption.REPLACE_EXISTING);
-
-            FileInfo info = new FileInfo();
-            info.setTaskId(todo.getTaskId());
-            info.setFileName(saveName);
-            info.setFilePath(path.toString());
-            info.setFileSize(file.getSize());
-
-            String contentType = file.getContentType();
-            if (contentType == null) {
-                contentType = "application/octet-stream";
-            }
-            info.setContentType(contentType);
-
-            fileMapper.insertFile(info);
-        }
+        saveFiles(todo.getTaskId(), files);
         
         //状態の応じて子タスクの更新
         if (todo.getDoneFlg() == 1) {
@@ -288,8 +229,14 @@ public class TodoController {
         } else {
             todoMapper.undoneSubTask(todo.getTaskId());
         }
-
+        logger.info("Todo更新成功 taskId={}",todo.getTaskId());
+        
         return "redirect:/detail?taskId=" + todo.getTaskId();
+        
+    	}catch(Exception e) {
+    		logger.error("Todo更新失敗 taskId={}", todo.getTaskId(), e);
+            throw e;
+    		}
     }
     
     /**
@@ -321,44 +268,16 @@ public class TodoController {
             Todo todo,
             @RequestParam("files") MultipartFile[] files)
             throws IOException {
+    	try {
     	// サブタスクをDBへ登録
         todoMapper.add(todo);
-        
-        //添付ファイルを1件ずつ保存
-        for (MultipartFile file : files) {
-        	
-        	//ファイルが添付されていない場合は飛ばす
-            if (file.isEmpty()) {
-                continue;
-            }
-            //ファイル名取得
-            String saveName = file.getOriginalFilename();
-            
-            //保存先パスを作成
-            Path path = Paths.get(uploadDir, saveName);
-            
-            //ファイルをuploadsフォルダに保存
-            Files.copy(file.getInputStream(),
-                    path,
-                    StandardCopyOption.REPLACE_EXISTING);
-            
-            //ファイル情報をDB登録用Entityへ設定
-            FileInfo info = new FileInfo();
-            info.setTaskId(todo.getTaskId());
-            info.setFileName(saveName);
-            info.setFilePath(path.toString());
-            info.setFileSize(file.getSize());
-            
-            //Content-Type取得
-            String contentType = file.getContentType();
-            if (contentType == null) {
-                contentType = "application/octet-stream";
-            }
-            info.setContentType(contentType);
-            
-            //ファイル情報をDBへ登録
-            fileMapper.insertFile(info);
-        }
+        logger.info("サブタスク登録完了 taskId={}, 添付ファイル数={}",
+        		todo.getTaskId(), files.length);
+        saveFiles(todo.getTaskId(), files);
+    	} catch (Exception e) {
+    		logger.error("サブタスク登録失敗 taskId={}", todo.getTaskId(), e);
+    	    throw e;
+    	}
 
         return "redirect:/subtask/detail?taskId=" + todo.getTaskId();
     }
@@ -404,39 +323,18 @@ public class TodoController {
     public String updateSubTask(Todo todo,
     		@RequestParam("files") MultipartFile[] files)
     		        throws IOException {
+        try {
+        	todoMapper.update(todo);
+        	saveFiles(todo.getTaskId(),files);
+        	logger.info("サブタスク更新完了 taskId={},添付ファイル数={}",
+        		todo.getTaskId(), files.length);
         
-        todoMapper.update(todo);
-        for (MultipartFile file : files) {
-            if (file.isEmpty()) {
-                continue;
-            }
-
-            String saveName = file.getOriginalFilename();
-
-            Path path = Paths.get(uploadDir, saveName);
-
-            Files.copy(file.getInputStream(),
-                    path,
-                    StandardCopyOption.REPLACE_EXISTING);
-
-            FileInfo info = new FileInfo();
-            info.setTaskId(todo.getTaskId());
-            info.setFileName(saveName);
-            info.setFilePath(path.toString());
-            info.setFileSize(file.getSize());
-
-            String contentType = file.getContentType();
-            if (contentType == null) {
-                contentType = "application/octet-stream";
-            }
-            info.setContentType(contentType);
-
-            fileMapper.insertFile(info);
-        }
-
-
-        return "redirect:/subtask/detail?taskId="
+        	return "redirect:/subtask/detail?taskId="
                 + todo.getTaskId();
+        }catch(IOException e) {
+        	logger.error("サブタスク更新失敗 taskId={}", todo.getTaskId(), e);
+        	throw e;
+        }
     }
     
     /**
@@ -451,23 +349,17 @@ public class TodoController {
     public String upload(
     		@RequestParam Long taskId,
     		@RequestParam("files") MultipartFile[] files) throws IOException{
-    	
-    	for (MultipartFile file : files) {
-    		if (file.isEmpty()) {
-    			continue;
-    		}
-    		String saveName = file.getOriginalFilename();
-    		Path path = Paths.get(uploadDir,saveName);
-    		Files.copy(file.getInputStream(),path,StandardCopyOption.REPLACE_EXISTING);
-    		FileInfo info = new FileInfo();
-    		info.setTaskId(taskId);
-    		info.setFileName(saveName);
-    		info.setFilePath(path.toString());
-    		info.setContentType(file.getContentType());
+    	try {
     		
-    		fileMapper.insertFile(info);
-    		}
-    	return "redirect:/detail?taskId=" + taskId;
+    		saveFiles(taskId,files);
+    		
+    		logger.info("添付ファイル追加完了 taskId={},添付ファイル数={}",taskId,files.length);
+    		
+    		return "redirect:/detail?taskId=" + taskId;
+    	}catch(IOException e) {
+    		logger.error("添付ファイル追加失敗 taskId={}", taskId, e);
+            throw e;
+    	}
     }
     
     /**
@@ -481,7 +373,7 @@ public class TodoController {
     @GetMapping("/download")
     public ResponseEntity<InputStreamResource> download(
             @RequestParam("fileId") Long fileId) throws IOException {
-
+    	try {
         FileInfo file = fileMapper.selectByFileId(fileId);
 
         Path path = Paths.get(file.getFilePath());
@@ -501,6 +393,52 @@ public class TodoController {
                 .contentLength(Files.size(path))
                 .contentType(MediaType.APPLICATION_OCTET_STREAM)
                 .body(resource);
+    	}catch(Exception e) {
+    		logger.error("ダウンロード失敗 fileId={}",fileId,e);
+    		throw e;
+    	}
+    }
+    /**
+     * 添付ファイルを保存して、DBへ登録する
+     */
+    private void saveFiles(Long taskId,MultipartFile[] files)throws IOException {
+    	for(MultipartFile file : files) {
+            if (file.isEmpty()) {
+                continue;
+            }
+
+            //元のファイル名
+            String originalName = file.getOriginalFilename();
+            
+            //保存用ファイル名
+            String saveName = UUID.randomUUID() + "_" + originalName;
+            
+            //保存先
+            Path path = Paths.get(uploadDir,saveName);
+
+            Files.copy(file.getInputStream(),path,
+            		StandardCopyOption.REPLACE_EXISTING);
+            
+            //DB登録
+            FileInfo info = new FileInfo();
+            info.setTaskId(taskId);
+            
+            //画面表示用名前
+            info.setFileName(originalName);
+            
+            //実際の保存先
+            info.setFilePath(path.toString());
+
+            info.setFileSize(file.getSize());
+
+            String contentType = file.getContentType();
+            if (contentType == null) {
+                contentType = "application/octet-stream";
+            }
+            info.setContentType(contentType);
+
+            fileMapper.insertFile(info);
+        }
     }
 }
 
