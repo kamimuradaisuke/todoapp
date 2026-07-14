@@ -32,156 +32,149 @@ href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
 
 <div class="detail-box">
 
-    <h1><b>TodoList</b></h1>
+<h1><b>TodoList</b></h1>
 
-    <h3>タスク詳細</h3>
+<h3>タスク詳細</h3>
 
-    <form th:action="@{/update}" method="post"th:object="${todo}"enctype="multipart/form-data">
+<form th:action="@{/update}" method="post"th:object="${todo}"enctype="multipart/form-data">
+	
+	<input type="hidden"
+    	name="taskId"
+        th:value="${todo.taskId}">
 
-        <input type="hidden"
-               name="taskId"
-               th:value="${todo.taskId}">
+	<div class="text-right mb-3">
+		<button
+	        type="button"
+	        class="btn btn-success"
+	        data-toggle="modal"
+	        data-target="#subTaskModal">
+	        子タスク追加
+		</button>
 
-        <div class="text-right mb-3">
-			<button
-			        type="button"
-			        class="btn btn-success"
-			        data-toggle="modal"
-			        data-target="#subTaskModal">
-			        子タスク追加
-			    </button>
+        <button type="button"
+        	class="btn btn-secondary"
+            onclick="location.href='/'">
+            戻る
+		</button>
 
-            <button type="button"
-                    class="btn btn-secondary"
-                    onclick="location.href='/'">
-                戻る
-            </button>
+        <button type="submit"
+        	class="btn btn-primary">
+            保存
+        </button>
+	</div>
 
-            <button type="submit"
-                    class="btn btn-primary">
-                保存
-            </button>
-
-        </div>
-
-        <div class="form-row">
+<div class="form-row">
 			
-			<div class="col-md-1 flex-column justify-content-center">
-
-			    <label>状態</label>
-
-			    <div>
-					<input type="hidden"
-						   name="taskId"
-						   th:value="${todo.taskId}">
-				   	   
-						  
-
-					    <input type="checkbox"
-					           name="doneFlg"
-							   value="1"
-					           th:checked="${todo.doneFlg == 1}">
-					    <input type="hidden"
-						       name="doneFlg"
-						       value="0">
-							   
-			    </div>
-
-			</div>
+<div class="col-md-1 flex-column justify-content-center">
+	<label>状態</label>
+<div>
+	<input type="hidden"
+		name="taskId"
+		th:value="${todo.taskId}">
+		   	   						  
+	<input type="checkbox"
+		name="doneFlg"
+		value="1"
+		th:checked="${todo.doneFlg == 1}">
+	<input type="hidden"
+		name="doneFlg"
+		value="0">
+	  
+</div>
+</div>
 			
+<div class="col-md-3">
+	<label>タスク名
+		<span class="text-danger">*</span>
+	</label>
+	
+	<input type="text"
+    	class="form-control"
+        name="taskName"
+        th:value="${todo.taskName}"
+		required
+		oninvalid="this.setCustomValidity('タスク名を入力してください')"
+		oninput="this.setCustomValidity('')">
+</div>
 
-            <div class="col-md-3">
-                <label>タスク名
-					<span class="text-danger">*</span>
-				</label>
-                <input type="text"
-                       class="form-control"
-                       name="taskName"
-                       th:value="${todo.taskName}"
-					   required
-					   oninvalid="this.setCustomValidity('タスク名を入力してください')"
-					   oninput="this.setCustomValidity('')">
-            </div>
+<div class="form-group">
+	<label>優先度</label>
+	<select name="priorityId"
+		class="form-control">
+		<option th:each="p : ${priorityList}"
+			th:value="${p.priorityId}"
+			th:text="${p.priorityName}"
+			th:selected="${p.priorityId == todo.priorityId}">
+		</option>
+	</select>
+</div>
 
-			<div class="form-group">
-			                        <label>優先度</label>
-			                        <select name="priorityId"
-			                                class="form-control">
-			                            <option th:each="p : ${priorityList}"
-										        th:value="${p.priorityId}"
-											    th:text="${p.priorityName}"
-												th:selected="${p.priorityId == todo.priorityId}">
-										</option>
-			                        </select>
-			                    </div>
+<div class="form-group">
+	<label>カテゴリ</label>
+	<select name="categoryId"
+		class="form-control">
+		<option th:each="c : ${catgoryList}"
+			th:value="${c.categoryId}"
+			th:text="${c.categoryName}"
+			th:selected="${c.categoryId == todo.categoryId}">
+		</option>
+	</select>
+</div>
 
-			                    <div class="form-group">
-			                        <label>カテゴリ</label>
-			                        <select name="categoryId"
-			                                class="form-control">
-			                            <option th:each="c : ${catgoryList}"
-										        th:value="${c.categoryId}"
-												th:text="${c.categoryName}"
-												th:selected="${c.categoryId == todo.categoryId}">
-										</option>
-										
-			                        </select>
-			                    </div>
+<div class="col-md-3">
+	<label>実施予定日</label>
+    <input type="date"
+    	class="form-control"
+        name="scheduledWorkDate"
+        th:value="${todo.scheduledWorkDate}">
+</div>
+</div>
 
-            <div class="col-md-3">
-                <label>実施予定日</label>
-                <input type="date"
-                       class="form-control"
-                       name="scheduledWorkDate"
-                       th:value="${todo.scheduledWorkDate}">
-            </div>
+<div class="form-group">
+	<label>添付ファイル追加</label>
+	<input
+		type="file"
+		name="files"
+		multiple
+		class="form-control-file">
+</div>
 
-        </div>
-		<div class="form-group">
-		    <label>添付ファイルを追加</label>
+<div class="form-group">
+	<label>
+		添付ファイル
+		(<span th:text="${#lists.size(fileList)}">0</span>件)
+	</label>
 
-		    <input type="file"
-		           id="files"
-		           name="files"
-		           multiple
-		           class="form-control-file">
-
-		    <ul id="fileList"></ul>
-		</div>
-
-		<div class="form-group">
-		    <label>
-		        添付ファイル
-		        (<span th:text="${#lists.size(fileList)}">0</span>件)
-		    </label>
-
-		    <table class="table table-sm">
-		        <tr th:each="file : ${fileList}">
-		            <td style="width:70%;">
+	<table class="table table-sm">
+		
+		<tr th:each="file : ${fileList}">
+			
+			<td style="width:70%;">
 		                📄 <span th:text="${file.fileName}"></span>
-		            </td>
-		            <td>
-		                <a th:href="@{/download(fileId=${file.fileId})}"
-		                   class="btn btn-sm btn-primary">
-		                    ダウンロード
-		                </a>
-		            </td>
-		        </tr>
+		    </td>
+		    
+			<td>
+		    	<a th:href="@{/download(fileId=${file.fileId})}"
+		        	class="btn btn-sm btn-primary">
+		            ダウンロード
+		        </a>
+		    </td>
+		</tr>
 
-		        <tr th:if="${#lists.isEmpty(fileList)}">
-		            <td colspan="2">
-		                添付ファイルはありません
-		            </td>
-		        </tr>
-		    </table>
-		</div>
+		<tr th:if="${#lists.isEmpty(fileList)}">
+			<td colspan="2">
+		    添付ファイルはありません
+		    </td>
+		</tr>
+	</table>
+</div>
 
-		<div class="form-group">
-		    <label>メモ</label>
-		    <textarea th:field="*{memo}"
-		              class="form-control"
-					  rows="5"></textarea>
-		</div>
+<div class="form-group">
+	<label>メモ</label>
+	<textarea th:field="*{memo}"
+		class="form-control"
+		rows="5"></textarea>
+</div>
 
     </form>
 
@@ -308,26 +301,18 @@ href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
 						          class="form-control"
 								  rows="5"></textarea>
 					</div>
-					<script>
-					const subFiles = document.getElementById("subFiles");
-					const subFileList = document.getElementById("subFileList");
-					const subFileCount = document.getElementById("subFileCount");
+					<div class="form-group">
+					    <label>
+							添付ファイル <span id="fileCount">0</span>件
+					    </label>
+						<input
+						    type="file"
+						    id="files"
+						    name="files"
+						    multiple>
 
-					subFiles.addEventListener("change", function () {
-
-					    subFileList.innerHTML = "";
-
-					    for (const file of this.files) {
-					        const li = document.createElement("li");
-					        li.textContent = "📄 " + file.name;
-					        subFileList.appendChild(li);
-					    }
-
-					    subFileCount.textContent = this.files.length;
-					});
-					</script>
-
-            </div>
+						<ul id="fileList"></ul>
+					</div>
 
             <div class="modal-footer">
 
@@ -353,7 +338,10 @@ href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
 
 </div>
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+<script th:src="@{/js/todo.js}"></script>
+</script>
+
+
 </body>
 </html>

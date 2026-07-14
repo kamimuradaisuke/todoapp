@@ -15,5 +15,6 @@ public interface FileMapper {
     List<FileInfo> selectByTaskId(Long taskId);
     FileInfo selectByFileId(Long fileId);
     void deleteFile(Long fileId);
+    void deleteCompleteFiles();
     
 }

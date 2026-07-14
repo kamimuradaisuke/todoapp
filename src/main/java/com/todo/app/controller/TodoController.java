@@ -1,6 +1,8 @@
 package com.todo.app.controller;
 
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -19,6 +21,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -82,8 +85,12 @@ public class TodoController {
     }
     /**
      * 新規Todoを追加する
+     * タスク登録後に添付ファイルを保存する
      *
      * @param todo 入力されたTodo情報
+     * @param result バリデーション結果
+     * @param model 画面表示用データ
+     * @param file 添付ファイル
      * @return 詳細画面へリダイレクト
      */
     @PostMapping("/add")
@@ -104,18 +111,35 @@ public class TodoController {
         
         //添付ファイル登録
         for (MultipartFile file : files) {
+        	//ファイルが選択されてない場合はスキップ
         	if (file.isEmpty()) {
         		continue;
         	}
+        	//ファイル名取得
         	String saveName = file.getOriginalFilename();
+        	
+        	//保存先パス作成
         	Path path = Paths.get(uploadDir, saveName);
+        	
+        	//ファイルをuploadsフォルダに保存
         	Files.copy(file.getInputStream(),path,StandardCopyOption.REPLACE_EXISTING);
         	
+        	//ファイル情報をDBに登録
         	FileInfo info = new FileInfo();
         	info.setTaskId(todo.getTaskId());
         	info.setFileName(saveName);
         	info.setFilePath(path.toString());
         	info.setFileSize(file.getSize());
+        	
+        	//ファイル形式取得
+        	String contentType = file.getContentType();
+        	
+        	// 形式が取得できない場合はデフォルト設定
+        	if (contentType == null) {
+        		contentType = "application/octet-stream";
+        	}
+        	
+        	info.setContentType(file.getContentType());
         	fileMapper.insertFile(info);
         }
         System.out.println("files = " + files.length);
@@ -124,19 +148,24 @@ public class TodoController {
     
     /**
      * タスクを完了状態にする
+     * 親タスク完了時は子タスクも完了状態へ変更する
      * 
      * @param taskId 対象タスクID
+     * @return index画面へリダイレクト
      */
     @RequestMapping("/done")
     public String done(Long taskId) {
     	
+    	//親子タスクを完了状態に変更
         todoMapper.done(taskId);
+        //子タスクを完了済状態に変更
         todoMapper.doneSubTask(taskId);
 
         return "redirect:/";
     }
     /**
      *タスクを未完了状態にする
+     *親タスク未完了時は子タスクも未完了状態へ変更する
      * 
      * @param taskId 対象タスクID
      * @return index画面へリダイレクト
@@ -162,12 +191,16 @@ public class TodoController {
     
     /**
      *完了済みタスクを一括削除
+     * 添付ファイル情報も削除する
      * 
      * @return index画面へリダイレクト
      */
     @PostMapping("/deleteComplete")
     public String deleteComplete() {
+    	// 完了済みタスクのファイル削除
+        fileMapper.deleteCompleteFiles();
 
+        // 完了済みタスク削除
         todoMapper.deleteComplete();
 
         return "redirect:/";
@@ -175,6 +208,8 @@ public class TodoController {
     
     /**
      * 詳細画面を表示する
+     * 親タスク、子タスク、添付ファイル一覧を取得する
+     * 
      * @param taskId タスクID
      * @param model 画面表示用モデル
      * @return detail画面
@@ -186,6 +221,7 @@ public class TodoController {
         //子タスク取得
         List<Todo> subTasks =
                 todoMapper.selectSubTask(taskId);
+        //添付ファイル取得
         List<FileInfo> fileList =
                 fileMapper.selectByTaskId(taskId);
         //画面へデータ設定
@@ -200,16 +236,51 @@ public class TodoController {
     
    /**
     * 親タスクを更新する
+    * 添付ファイルを追加保存する
     * 親の状態に応じて子の状態も同期更新する
     * 
     * @param todo 更新対象データ
+    * @param file 添付ファイルを追加保存する
     * @return detail画面へリダイレクト
     */
     @PostMapping("/update")
-    public String update(Todo todo) {
+    public String update(Todo todo,
+    		@RequestParam("files") MultipartFile[] files)
+            throws IOException{
     	
     	//タスク更新
         todoMapper.update(todo);
+        
+        //添付ファイルを更新
+        for (MultipartFile file : files) {
+        	
+        	//未選択ファイルは処理しない
+            if (file.isEmpty()) {
+                continue;
+            }
+
+            String saveName = file.getOriginalFilename();
+
+            Path path = Paths.get(uploadDir, saveName);
+
+            Files.copy(file.getInputStream(),
+                    path,
+                    StandardCopyOption.REPLACE_EXISTING);
+
+            FileInfo info = new FileInfo();
+            info.setTaskId(todo.getTaskId());
+            info.setFileName(saveName);
+            info.setFilePath(path.toString());
+            info.setFileSize(file.getSize());
+
+            String contentType = file.getContentType();
+            if (contentType == null) {
+                contentType = "application/octet-stream";
+            }
+            info.setContentType(contentType);
+
+            fileMapper.insertFile(info);
+        }
         
         //状態の応じて子タスクの更新
         if (todo.getDoneFlg() == 1) {
@@ -243,22 +314,105 @@ public class TodoController {
      * 
      * @param todo 登録するサブタスク
      * @return subtaskDetail画面へリダイレクト
+     * @param files 添付ファイル
      */
     @PostMapping("/addSubTask")
     public String addSubTask(
             Todo todo,
             @RequestParam("files") MultipartFile[] files)
             throws IOException {
-
+    	// サブタスクをDBへ登録
         todoMapper.add(todo);
-
+        
+        //添付ファイルを1件ずつ保存
         for (MultipartFile file : files) {
+        	
+        	//ファイルが添付されていない場合は飛ばす
+            if (file.isEmpty()) {
+                continue;
+            }
+            //ファイル名取得
+            String saveName = file.getOriginalFilename();
+            
+            //保存先パスを作成
+            Path path = Paths.get(uploadDir, saveName);
+            
+            //ファイルをuploadsフォルダに保存
+            Files.copy(file.getInputStream(),
+                    path,
+                    StandardCopyOption.REPLACE_EXISTING);
+            
+            //ファイル情報をDB登録用Entityへ設定
+            FileInfo info = new FileInfo();
+            info.setTaskId(todo.getTaskId());
+            info.setFileName(saveName);
+            info.setFilePath(path.toString());
+            info.setFileSize(file.getSize());
+            
+            //Content-Type取得
+            String contentType = file.getContentType();
+            if (contentType == null) {
+                contentType = "application/octet-stream";
+            }
+            info.setContentType(contentType);
+            
+            //ファイル情報をDBへ登録
+            fileMapper.insertFile(info);
+        }
 
+        return "redirect:/subtask/detail?taskId=" + todo.getTaskId();
+    }
+    
+    /**
+     * サブタスク詳細画面を表示する
+     * サブタスク情報、親タスク情報、添付ファイル一覧を取得する
+     * 
+     * @param taskId サブタスクID
+     * @param model 画面表示用モデル
+     * @return subutasukDetail画面
+     */
+    @RequestMapping("/subtask/detail")
+    public String subtaskDetail(Long taskId, Model model) {
+    	//サブタスク取得
+        Todo todo = todoMapper.selectById(taskId);
+        //親タスク取得
+        Todo parentTask =
+                todoMapper.selectById(todo.getParentId());
+        List<FileInfo>fileList = 
+        		fileMapper.selectByTaskId(taskId);
+        //画面へデータの設定
+        model.addAttribute("todo", todo);
+        model.addAttribute("parentTask", parentTask);
+        model.addAttribute("fileList",fileList);
+        //プルダウン表示用データの設定
+        model.addAttribute("priorityList",todoMapper.selectPriorityList());
+        model.addAttribute("catgoryList",todoMapper.selectCategoryList());
+        
+
+        return "subtaskDetail";
+    }
+    
+    /**
+     * サブタスクを更新する
+     * タスク内容を更新し、新しく追加された添付ファイルを保存する
+ *
+     * @param todo 更新対象サブタスク
+     * @param files 追加する添付ファイル
+     * @return subtaskDetail画面へリダイレクト
+     */
+    @PostMapping("/updateSubTask")
+    public String updateSubTask(Todo todo,
+    		@RequestParam("files") MultipartFile[] files)
+    		        throws IOException {
+        
+        todoMapper.update(todo);
+        for (MultipartFile file : files) {
             if (file.isEmpty()) {
                 continue;
             }
 
             String saveName = file.getOriginalFilename();
+
             Path path = Paths.get(uploadDir, saveName);
 
             Files.copy(file.getInputStream(),
@@ -271,50 +425,28 @@ public class TodoController {
             info.setFilePath(path.toString());
             info.setFileSize(file.getSize());
 
+            String contentType = file.getContentType();
+            if (contentType == null) {
+                contentType = "application/octet-stream";
+            }
+            info.setContentType(contentType);
+
             fileMapper.insertFile(info);
         }
-
-        return "redirect:/subtask/detail?taskId=" + todo.getTaskId();
-    }
-    
-    /**
-     * サブタスク詳細画面を表示する
-     * @param taskId サブタスクID
-     * @param model 画面表示用モデル
-     * @return subutasukDetail画面
-     */
-    @RequestMapping("/subtask/detail")
-    public String subtaskDetail(Long taskId, Model model) {
-    	//サブタスク取得
-        Todo todo = todoMapper.selectById(taskId);
-        //親タスク取得
-        Todo parentTask =
-                todoMapper.selectById(todo.getParentId());
-        //画面へデータの設定
-        model.addAttribute("todo", todo);
-        model.addAttribute("parentTask", parentTask);
-        model.addAttribute("priorityList",todoMapper.selectPriorityList());
-        model.addAttribute("catgoryList",todoMapper.selectCategoryList());
-
-        return "subtaskDetail";
-    }
-    
-    /**
-     * サブタスクを更新する
-     * @param todo 更新対象サブタスク
-     * @return subtaskDetail画面へリダイレクト
-     */
-    @PostMapping("/updateSubTask")
-    public String updateSubTask(Todo todo) {
-
-        
-        todoMapper.update(todo);
 
 
         return "redirect:/subtask/detail?taskId="
                 + todo.getTaskId();
     }
     
+    /**
+     * 添付ファイル追加登録処理
+     * 既存タスクへファイルのみ追加する
+     *
+     * @param taskId ファイルを紐づけるタスクID
+     * @param files 登録する添付ファイル
+     * @return タスク詳細画面へリダイレクト
+     */
     @PostMapping("/upload")
     public String upload(
     		@RequestParam Long taskId,
@@ -337,8 +469,18 @@ public class TodoController {
     		}
     	return "redirect:/detail?taskId=" + taskId;
     }
-    @RequestMapping("/download")
-    public ResponseEntity<InputStreamResource> download(Long fileId) throws IOException {
+    
+    /**
+     * 添付ファイルダウンロード処理
+     * 指定されたファイルIDからファイル情報を取得し、
+     * 保存先のファイルをレスポンスとして返却する
+     *
+     * @param fileId ダウンロード対象ファイルID
+     * @return ファイルデータ
+     */
+    @GetMapping("/download")
+    public ResponseEntity<InputStreamResource> download(
+            @RequestParam("fileId") Long fileId) throws IOException {
 
         FileInfo file = fileMapper.selectByFileId(fileId);
 
@@ -347,9 +489,15 @@ public class TodoController {
         InputStreamResource resource =
                 new InputStreamResource(Files.newInputStream(path));
 
+        String encodedFileName =
+                URLEncoder.encode(
+                        file.getFileName(),
+                        StandardCharsets.UTF_8
+                );
+
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION,
-                        "attachment; filename=\"" + file.getFileName() + "\"")
+                        "attachment; filename*=UTF-8''" + encodedFileName)
                 .contentLength(Files.size(path))
                 .contentType(MediaType.APPLICATION_OCTET_STREAM)
                 .body(resource);

@@ -66,21 +66,32 @@ $('#delete').click(function(){
     $.post("/delete").done(function(){
         $('#donetodes').empty();
         $('#done_count').text(0);
-    })
+    });
 });
 
+// 添付ファイル一覧表示
 const fileInput = document.getElementById("files");
 const fileList = document.getElementById("fileList");
 const fileCount = document.getElementById("fileCount");
 
-fileInput.addEventListener("change", function () {
-	fileList.innerHTML = "";
-	
-	for (const file of this.files) {
-		const li = document.createElement("li");
-		li.textContent = "📄 " + file.name;
-		fileList.appendChild(li);
-		}
-	fileCount.textContent = this.files.length;
-});
+if (fileInput && fileList && fileCount) {
 
+    console.log("ファイル選択のイベントを登録しました");
+
+    fileInput.addEventListener("change", function () {
+
+        console.log("change!");
+
+        fileList.innerHTML = "";
+
+        for (const file of this.files) {
+            const li = document.createElement("li");
+            li.textContent = "📄 " + file.name;
+            fileList.appendChild(li);
+        }
+
+        fileCount.textContent = this.files.length;
+    });
+
+}
+});
