@@ -6,9 +6,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.util.List;
-import java.util.UUID;
 
 import jakarta.validation.Valid;
 
@@ -33,6 +31,7 @@ import com.todo.app.entity.FileInfo;
 import com.todo.app.entity.Todo;
 import com.todo.app.mapper.FileMapper;
 import com.todo.app.mapper.TodoMapper;
+import com.todo.app.service.TodoService;
 
 
 @Controller
@@ -46,6 +45,8 @@ public class TodoController {
     TodoMapper todoMapper;
     @Autowired
     FileMapper fileMapper;
+    @Autowired
+    private TodoService todoService;
     /**
      * マイタスク一覧画面を表示する
      *
@@ -107,10 +108,8 @@ public class TodoController {
         	logger.error("入力チェックエラー: {}", result.getAllErrors());
             return index(model);
         }
-        //Todo登録
-        todoMapper.add(todo);
-        
-        saveFiles(todo.getTaskId(), files);
+
+        todoService.addTodo(todo, files);
         logger.info("Todo登録完了 taskId={},添付ファイル数={}",todo.getTaskId(), files.length);
         
         return "redirect:/detail?taskId=" + todo.getTaskId();
@@ -218,17 +217,8 @@ public class TodoController {
     		@RequestParam("files") MultipartFile[] files)
             throws IOException{
     	try {
-    	//タスク更新
-        todoMapper.update(todo);
-        
-        saveFiles(todo.getTaskId(), files);
-        
-        //状態の応じて子タスクの更新
-        if (todo.getDoneFlg() == 1) {
-            todoMapper.doneSubTask(todo.getTaskId());
-        } else {
-            todoMapper.undoneSubTask(todo.getTaskId());
-        }
+    		todoService.updateTodo(todo, files);
+    		
         logger.info("Todo更新成功 taskId={}",todo.getTaskId());
         
         return "redirect:/detail?taskId=" + todo.getTaskId();
@@ -269,11 +259,9 @@ public class TodoController {
             @RequestParam("files") MultipartFile[] files)
             throws IOException {
     	try {
-    	// サブタスクをDBへ登録
-        todoMapper.add(todo);
+    		todoService.addSubTask(todo, files);
         logger.info("サブタスク登録完了 taskId={}, 添付ファイル数={}",
         		todo.getTaskId(), files.length);
-        saveFiles(todo.getTaskId(), files);
     	} catch (Exception e) {
     		logger.error("サブタスク登録失敗 taskId={}", todo.getTaskId(), e);
     	    throw e;
@@ -324,8 +312,7 @@ public class TodoController {
     		@RequestParam("files") MultipartFile[] files)
     		        throws IOException {
         try {
-        	todoMapper.update(todo);
-        	saveFiles(todo.getTaskId(),files);
+        	todoService.updateSubTask(todo, files);
         	logger.info("サブタスク更新完了 taskId={},添付ファイル数={}",
         		todo.getTaskId(), files.length);
         
@@ -350,8 +337,7 @@ public class TodoController {
     		@RequestParam Long taskId,
     		@RequestParam("files") MultipartFile[] files) throws IOException{
     	try {
-    		
-    		saveFiles(taskId,files);
+    		todoService.uploadFiles(taskId, files);
     		
     		logger.info("添付ファイル追加完了 taskId={},添付ファイル数={}",taskId,files.length);
     		
@@ -397,48 +383,6 @@ public class TodoController {
     		logger.error("ダウンロード失敗 fileId={}",fileId,e);
     		throw e;
     	}
-    }
-    /**
-     * 添付ファイルを保存して、DBへ登録する
-     */
-    private void saveFiles(Long taskId,MultipartFile[] files)throws IOException {
-    	for(MultipartFile file : files) {
-            if (file.isEmpty()) {
-                continue;
-            }
-
-            //元のファイル名
-            String originalName = file.getOriginalFilename();
-            
-            //保存用ファイル名
-            String saveName = UUID.randomUUID() + "_" + originalName;
-            
-            //保存先
-            Path path = Paths.get(uploadDir,saveName);
-
-            Files.copy(file.getInputStream(),path,
-            		StandardCopyOption.REPLACE_EXISTING);
-            
-            //DB登録
-            FileInfo info = new FileInfo();
-            info.setTaskId(taskId);
-            
-            //画面表示用名前
-            info.setFileName(originalName);
-            
-            //実際の保存先
-            info.setFilePath(path.toString());
-
-            info.setFileSize(file.getSize());
-
-            String contentType = file.getContentType();
-            if (contentType == null) {
-                contentType = "application/octet-stream";
-            }
-            info.setContentType(contentType);
-
-            fileMapper.insertFile(info);
-        }
     }
 }
 
