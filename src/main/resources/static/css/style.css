@@ -18,6 +18,31 @@
     padding:20px;
 }
 
+
+.done-task td::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    border-top: 1px solid #666;
+}
+body{
+	margin:20px;
+}
+
+
+.table th{
+	border:none;
+}
+
+.table td{
+	border:none;
+}
+.table th,
+.table td{
+	vertical-align: middle;
+}
 .done-task td {
     position: relative;
     color: #888;
@@ -35,4 +60,142 @@
 .status-checkbox{
     transform: scale(1.6);
     margin-top: 8px;
+}
+.detail-box label{
+    font-size:20px;
+    font-weight:bold;
+}
+
+.detail-box .form-control{
+    font-size:20px;
+}
+
+.detail-box input.form-control,
+.detail-box select.form-control{
+    height:40px;
+    padding:5px 10px;
+}
+
+.detail-box textarea.form-control{
+    height:80px;
+    font-size:14px;
+    padding:5px 8px;
+}
+
+.detail-box .btn{
+    font-size:14px;
+}
+.modal-header h5{
+    font-size:28px;
+    font-weight:bold;
+}
+
+.modal-body label{
+    font-size:18px;
+    font-weight:bold;
+}
+
+.modal-body .form-control{
+    font-size:18px;
+}
+
+.modal-body .btn{
+    font-size:16px;
+}
+@media (max-width:767px){
+	body{
+		font-size:12px;
+		margin:0;
+		padding:8px;
+	}
+	.todo-area{
+		margin:0;
+		padding:8px;
+		width:100%;
+		max-width:100%;
+	}
+	h1{
+		font-size:18px;
+	}
+	
+	 h2{
+		font-size:13px;
+	}
+	th, td{
+		font-size:13px;
+		padding:0.5px;
+	}
+
+	.status-checkbox{
+		transform:scale(0.375);
+	}
+	.table{
+		width: 100%;
+		table-layout:fixed;
+	}
+    .modal-dialog{
+        max-width:90%;
+        margin:10px auto;
+    }
+
+    .modal-body{
+        padding:15px;
+    }
+
+    .modal-header h5{
+        font-size:20px;
+    }
+
+    .modal-body label{
+        font-size:16px;
+    }
+
+    .modal-body input.form-control,
+	.modal-body select.form-control{
+		height:35px;
+        font-size:16px;
+		padding:5px 8px;
+    }
+
+    .modal-footer .btn{
+        width:40%;
+		height:40px;
+		font-size:10px;
+		padding:3px 8px;
+    }
+	.modal-body textarea.form-control{
+	    height:70px;
+	    font-size:16px;
+	    padding:5px 8px;
+	}
+	.detail-buttons .btn{
+		font-size:18px;
+		padding:10px 16px;
+		min-height:42px;
+	}
+	
+	.subtask-area,
+	.file-area{
+		font-size: 19x;
+	}
+	.subtask-area h5,
+    .file-area label{
+        font-size:19px;
+        font-weight:bold;
+    }
+    .subtask-area th,
+    .subtask-area td,
+    .file-area th,
+    .file-area td{
+        font-size:19px;
+    }
+	.subtask-area .btn,
+	.file-area .btn{
+		font-size:19px;
+	    padding:6px 10px;
+	}
+	.file-area .btn{
+	    font-size:11px;
+	    padding:6px 13px;
+	}
 }
