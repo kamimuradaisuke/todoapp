@@ -133,6 +133,10 @@ body{
 		width: 100%;
 		table-layout:fixed;
 	}
+	.todo-table th,
+	.todo-table td{
+	    font-size:11px;
+	}
     .modal-dialog{
         max-width:90%;
         margin:10px auto;
