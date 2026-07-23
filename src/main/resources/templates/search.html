@@ -1,10 +1,145 @@
 <!DOCTYPE html>
-<html>
+<html xmlns:th="http://www.thymeleaf.org">
+
 <head>
-<meta charset="UTF-8">
-<title>Insert title here</title>
+	<meta charset="UTF-8">
+	<title>検索画面</title>
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+	<link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
+
 <body>
+	<div class="container mt-4">
+		<h2 class="text-center mb-4">検索画面</h2>
+		<div class="search-box">
+	</div>		<form th:action="@{/search}" method="</form>get">
+				<div class="form-row">
+
+					<div class="form-group col-md-3">
+						<label>タスク名</label>
+						<input type="text" class="form-control" name="taskName">
+					</div>
+
+					<div class="form-group col-md-5">
+						<label>実施予定日</label>
+
+						<div class="d-flex align-items-center">
+							<input type="date" class="form-control" name="fromDate">
+
+							<span class="mx-2">～</span>
+
+							<input type="date" class="form-control" name="toDate">
+						</div>
+					</div>
+
+					<div class="form-group col-md-2">
+						<label>状態</label>
+
+						<select class="form-control" name="doneFlg">
+							<option value="">-----</option>
+							<option value="0">未完了</option>
+							<option value="1">完了</option>
+						</select>
+
+					</div>
+
+				</div>
+				<div class="form-row">
+
+					<div class="form-group col-md-2">
+						<label>優先度</label>
+
+						<select class="form-control" name="priorityId">
+							<option value="">-----</option>
+
+							<option th:each="p : ${priorityList}" th:value="${p.priorityId}"
+								th:text="${p.priorityName}">
+							</option>
+
+							k
+						</select>
+					</div>
+					<div class="form-group col-md-2">
+
+						<label>カテゴリ</label>
+
+						<select class="form-control" name="categoryId">
+
+							<option value="">-----</option>
+
+							<option th:each="c : ${categoryList}" th:value="${c.categoryId}"
+								th:text="${c.categoryName}">
+							</option>
+
+						</select>
+					</div>
+
+				</div>
+
+				<div class="text-center mt-3">
+
+					<button type="submit" class="btn btn-primary">
+						検索
+					</button>
+
+					<a th:href="@{/search}" class="btn btn-secondary">
+						クリア
+					</a>
+
+				</div>
+
+			</form>
+
+		</div>
+
+		<table class="table table-bordered table-hover">
+
+			<thead class="thead-light">
+				<tr>
+					<th>状態</th>
+					<th>タスク名</th>
+					<th>優先度</th>
+					<th>カテゴリ</th>
+					<th>実施予定日</th>
+					<th></th>
+				</tr>
+			</thead>
+
+			<tbody>
+
+				<tr th:each="todo : ${todos}">
+
+					<td th:text="${todo.doneFlg == 0 ? '未完了' : '完了'}"></td>
+
+					<td th:text="${todo.taskName}"></td>
+
+					<td th:text="${todo.priorityName}"></td>
+
+					<td th:text="${todo.categoryName}"></td>
+
+					<td th:text="${todo.scheduledWorkDate}"></td>
+
+					<td>
+						<a class="btn btn-outline-primary btn-sm" th:href="@{/detail/{id}(id=${todo.taskId})}">
+							詳細
+						</a>
+					</td>
+
+				</tr>
+
+			</tbody>
+
+		</table>
+
+		<div class="text-right">
+
+			<a th:href="@{/}" class="btn btn-secondary">
+				戻る
+			</a>
+
+		</div>
+
+	</div>
 
 </body>
 </html>

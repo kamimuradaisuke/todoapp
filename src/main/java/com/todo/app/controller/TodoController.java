@@ -6,9 +6,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.util.List;
-import java.util.UUID;
 
 import jakarta.validation.Valid;
 
@@ -385,6 +383,11 @@ public class TodoController {
     		logger.error("ダウンロード失敗 fileId={}",fileId,e);
     		throw e;
     	}
+    }
+    @GetMapping("/search")
+    public String search(Model model) {
+
+        return "search";
     }
 }
 
