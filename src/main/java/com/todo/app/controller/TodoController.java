@@ -6,6 +6,8 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 import jakarta.validation.Valid;
@@ -39,7 +41,6 @@ public class TodoController {
 
     private static final Logger logger =
             LoggerFactory.getLogger(TodoController.class);
-    private final String uploadDir = "uploads";
     /** Todo操作用Mapper */
     @Autowired
     TodoMapper todoMapper;
@@ -80,7 +81,7 @@ public class TodoController {
         model.addAttribute("todo", new Todo());
         //プルダウン用データ
         model.addAttribute("priorityList",todoMapper.selectPriorityList());
-        model.addAttribute("catgoryList",todoMapper.selectCategoryList());
+        model.addAttribute("categoryList",todoMapper.selectCategoryList());
         
 
         return "index";
@@ -198,7 +199,7 @@ public class TodoController {
         model.addAttribute("subTasks", subTasks);
         model.addAttribute("fileList",fileList);
         model.addAttribute("priorityList",todoMapper.selectPriorityList());
-        model.addAttribute("catgoryList",todoMapper.selectCategoryList());
+        model.addAttribute("categoryList",todoMapper.selectCategoryList());
 
         return "detail";
     }
@@ -293,7 +294,7 @@ public class TodoController {
         model.addAttribute("fileList",fileList);
         //プルダウン表示用データの設定
         model.addAttribute("priorityList",todoMapper.selectPriorityList());
-        model.addAttribute("catgoryList",todoMapper.selectCategoryList());
+        model.addAttribute("categoryList",todoMapper.selectCategoryList());
         
 
         return "subtaskDetail";
@@ -387,7 +388,43 @@ public class TodoController {
     @GetMapping("/search")
     public String search(Model model) {
 
+        model.addAttribute("priorityList", todoMapper.selectPriorityList());
+        model.addAttribute("categoryList", todoMapper.selectCategoryList());
+
+        // 初回表示では空の一覧（または全件表示したい場合はselectAll()）
+        model.addAttribute("todos", new ArrayList<>());
+
         return "search";
+    }
+    @GetMapping("/search/result")
+    public String searchResult(
+    		@RequestParam(required = false)String taskName,
+    		@RequestParam(required = false)LocalDate fromDate,
+    		@RequestParam(required = false)LocalDate toDate,
+    		@RequestParam(required = false)Integer doneFlg,
+    		@RequestParam(required = false)Integer priorityId,
+    		@RequestParam(required = false)Integer categoryId,
+    		Model model) {
+    	List<Todo> todos =todoMapper.search(
+    			taskName,
+    			fromDate,
+    			toDate,
+    			doneFlg,
+    			priorityId,
+    			categoryId
+    			);
+    	
+    	model.addAttribute("priorityList",todoMapper.selectPriorityList());
+    	model.addAttribute("categoryList",todoMapper.selectCategoryList());
+    	model.addAttribute("todos",todos);
+    	model.addAttribute("taskName",taskName);
+    	model.addAttribute("fromDate",fromDate);
+    	model.addAttribute("toDate",toDate);
+    	model.addAttribute("doneFlg",doneFlg);
+    	model.addAttribute("priorityId",priorityId);
+    	model.addAttribute("categoryId",categoryId);
+    	
+    	return "search";
     }
 }
 

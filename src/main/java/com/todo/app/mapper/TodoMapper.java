@@ -1,8 +1,10 @@
 package com.todo.app.mapper;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import com.todo.app.entity.Category;
 import com.todo.app.entity.Priority;
@@ -29,5 +31,13 @@ public interface TodoMapper {
 	public void undoneSubTask(Long taskId);
 	public void deleteComplete();	
 	
+	public List<Todo>search(
+			@Param("taskName") String taskName,
+			@Param("fromDate") LocalDate fromDate,
+			@Param("toDate") LocalDate toDate,
+			@Param("doneFlg") Integer doneFlg,
+			@Param("priorityId") Integer priorityId,
+			@Param("categoryId") Integer categoryId
+			);
 }
 

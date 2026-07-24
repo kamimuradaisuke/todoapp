@@ -107,6 +107,9 @@ body{
     padding: 20px;
     margin-bottom: 30px;
 }
+.search-box + .text-center{
+    margin-bottom: 30px;
+}
 
 @media (max-width:767px){
 	body{
@@ -207,5 +210,34 @@ body{
 	.file-area .btn{
 	    font-size:11px;
 	    padding:6px 13px;
+	}
+	.search-box .form-row:last-child .form-group {
+		flex: 1;
+		margin-bottom: 10px;
+	}
+	
+	.search-box .form-row:last-child label {
+		font-size: 12px;
+	}
+	
+	.search-box .form-row:last-child .form-control {
+		font-size: 12px;
+		height: 34px;
+		padding: 4px 6px;
+	}
+	
+	.search-box .d-flex{
+	    display: flex;
+	    align-items: center;
+	}
+	
+	.search-box .d-flex input[type="date"]{
+	    width: calc(50% - 14px);
+	    flex: none;
+	}
+	
+	.search-box .d-flex span{
+		margin: 0 6px;
+		white-space: nowrap;
 	}
 }

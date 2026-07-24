@@ -58,7 +58,7 @@
 				<div class="col-md-1">
 					<label>カテゴリ</label>
 					<select name="categoryId" class="form-control">
-						<option th:each="c : ${catgoryList}" th:value="${c.categoryId}" th:text="${c.categoryName}"
+						<option th:each="c : ${categoryList}" th:value="${c.categoryId}" th:text="${c.categoryName}"
 							th:selected="${c.categoryId == todo.categoryId}">
 						</option>
 					</select>
@@ -166,7 +166,7 @@
 						<div class="form-group">
 							<label>カテゴリ</label>
 							<select name="categoryId" class="form-control">
-								<option th:each="c : ${catgoryList}" th:value="${c.categoryId}"
+								<option th:each="c : ${categoryList}" th:value="${c.categoryId}"
 									th:text="${c.categoryName}" th:selected="${c.categoryId == todo.categoryId}">
 								</option>
 							</select>
