@@ -195,7 +195,18 @@ ORDER BY category_id
 		ON t.category_id = c.category_id
 	<where>
 		<if test="taskName != null and taskName != ''">
-			AND t.task_name LIKE CONCAT('%', #{taskName},'%')
+			AND t.task_name LIKE CONCAT(
+				'%',
+				REPLACE(
+					REPLACE(
+						REPLACE(
+							#{taskName},'\','\\'),
+			 				'%','\%'
+			 			),
+			 			'_','\_'
+			 		),
+			 		'%'
+			 	)ESCAPE '\'
 		</if>
 		<if test="fromDate != null">
 			AND t.scheduled_work_date<![CDATA[>=]]> #{fromDate}
