@@ -229,4 +229,22 @@ ORDER BY category_id
 		t.parent_id NULLS FIRST,
 		t.task_id
 </select>
+
+<select id="selectNewTodos" resultType="com.todo.app.entity.Todo">
+
+	SELECT
+		task_id,
+		task_name,
+		priority_id,
+		category_id,
+		scheduled_work_date,
+		parent_id,
+		memo,
+		done_flg,
+		created_at
+	FROM item_table
+	WHERE created_at > #{lastCheckedAt}
+	ORDER BY created_at DESC
+
+</select>
 </mapper>

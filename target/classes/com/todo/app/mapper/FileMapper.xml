@@ -15,7 +15,8 @@
             task_id,
             file_name,
             file_path,
-            file_size
+            file_size,
+            content_type
         )
         VALUES (
             #{taskId},
@@ -75,5 +76,16 @@
         WHERE file_id = #{fileId}
 
     </delete>
+    <!-- ファイル削除 -->
+    <delete id="deleteCompleteFiles">
+
+    DELETE FROM files_table
+    WHERE task_id IN (
+        SELECT task_id
+        FROM item_table
+        WHERE done_flg = 1
+    )
+
+</delete>
 
 </mapper>

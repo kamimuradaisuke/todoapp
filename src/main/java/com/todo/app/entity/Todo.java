@@ -1,6 +1,7 @@
 package com.todo.app.entity;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import jakarta.validation.constraints.NotBlank;
@@ -25,4 +26,14 @@ public class Todo {
     private Integer doneFlg;        // 完了フラグ
 
     private List<Todo> subTasks;    // サブタスク
+	private LocalDateTime createdAt;
+
+	public LocalDateTime getCreatedAt() {
+		return createdAt;
+	}
+
+	public void setCreatedAt(LocalDateTime createdAt) {
+		this.createdAt = createdAt;
+	}
+
 }

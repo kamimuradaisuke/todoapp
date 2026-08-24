@@ -1,6 +1,7 @@
 package com.todo.app.mapper;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.apache.ibatis.annotations.Mapper;
@@ -20,6 +21,7 @@ public interface TodoMapper {
 	public List<Priority> selectPriorityList();
 	public List<Category> selectCategoryList();
 	public List<Todo> selectSubTask(Long parentId);
+	public List<Todo> selectNewTodos(LocalDateTime lastCheckedAt);
 	
 	public void add(Todo todo);
 	public void update(Todo todo);
@@ -29,8 +31,7 @@ public interface TodoMapper {
 	public void doneSubTask(Long taskId);
 	public void undone(Integer taskId);
 	public void undoneSubTask(Long taskId);
-	public void deleteComplete();	
-	
+	public void deleteComplete();
 	public List<Todo>search(
 			@Param("taskName") String taskName,
 			@Param("fromDate") LocalDate fromDate,

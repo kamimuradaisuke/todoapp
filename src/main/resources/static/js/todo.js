@@ -104,4 +104,32 @@ $(function() {
         $("select[name='priorityId']").prop("selectedIndex", 0);
         $("select[name='categoryId']").prop("selectedIndex", 0);
     });
-});
+	
+		let lastCheckedAt = new Date().toISOString();
+	    function checkNewTodos() {
+	        fetch(`/api/todo/new?lastCheckedAt=${encodeURIComponent(lastCheckedAt)}`)
+	            .then(response => {
+	                if (!response.ok) {
+	                    throw new Error("新着通知の取得に失敗しました");
+	                }
+	                return response.json();
+	            })
+	            .then(data => {
+	                if (data.todos.length > 0) {
+
+	                    data.todos.forEach(todo => {
+	                        Push.create("新しいタスクが追加されました！", {
+	                            body: `「${todo.taskName}」`,
+	                            timeout: 10000
+	                        });
+	                    });
+	                }
+	                lastCheckedAt = data.checkedAt;
+	            })
+	            .catch(error => {
+	                console.error("新着通知の確認に失敗しました:", error);
+	            });
+	    }
+	    checkNewTodos();
+	    setInterval(checkNewTodos, 300000);
+	});

@@ -7,8 +7,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import jakarta.validation.Valid;
 
@@ -426,6 +429,20 @@ public class TodoController {
     	
     	return "search";
     }
+
+	@GetMapping("/api/todo/new")
+	@ResponseBody
+	public Map<String, Object> getNewTodos(@RequestParam LocalDateTime lastCheckedAt) {
+		LocalDateTime now = LocalDateTime.now();
+		
+		List<Todo> todos = todoMapper.selectNewTodos(lastCheckedAt);
+		
+		Map<String, Object> response = new HashMap<>();
+		response.put("todos", todos);
+		response.put("checkedAt", now);
+		
+		return response;
+	}
 }
 
 
