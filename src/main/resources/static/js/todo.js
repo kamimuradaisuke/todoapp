@@ -105,7 +105,10 @@ $(function() {
         $("select[name='categoryId']").prop("selectedIndex", 0);
     });
 	
-		let lastCheckedAt = new Date().toISOString();
+	    let lastCheckedAt = new Date(
+	        Date.now() - new Date().getTimezoneOffset() * 60000
+	    ).toISOString().slice(0, 19);
+		
 	    function checkNewTodos() {
 	        fetch(`/api/todo/new?lastCheckedAt=${encodeURIComponent(lastCheckedAt)}`)
 	            .then(response => {
