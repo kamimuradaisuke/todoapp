@@ -128,11 +128,12 @@ $(function() {
 	                    });
 	                }
 	                lastCheckedAt = data.checkedAt;
+					sessionStorage.setItem("lastCheckedAt", lastCheckedAt);
+
 	            })
 	            .catch(error => {
 	                console.error("新着通知の確認に失敗しました:", error);
 	            });
 	    }
-	    checkNewTodos();
-	    setInterval(checkNewTodos, 300000);
+	    setInterval(checkNewTodos, 60000);
 	});
